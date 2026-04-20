@@ -24,7 +24,7 @@ public class LecturerCourseClass {
     private UUID employeeId;
 
     @Column(columnDefinition = "UNIQUEIDENTIFIER")
-    private UUID courseSectionId;
+    private UUID courseClassId;
 
     @Column(length = 50)
     private String role;
@@ -55,8 +55,8 @@ public class LecturerCourseClass {
     public UUID getEmployeeId() { return employeeId; }
     public void setEmployeeId(UUID employeeId) { this.employeeId = employeeId; }
 
-    public UUID getCourseSectionId() { return courseSectionId; }
-    public void setCourseSectionId(UUID courseSectionId) { this.courseSectionId = courseSectionId; }
+    public UUID getCourseClassId() { return courseClassId; }
+    public void setCourseClassId(UUID courseClassId) { this.courseClassId = courseClassId; }
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }

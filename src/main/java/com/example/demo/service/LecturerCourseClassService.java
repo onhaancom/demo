@@ -49,7 +49,7 @@ public class LecturerCourseClassService {
         LecturerCourseClass existing = lecturerCourseClassRepository.findById(id).orElse(null);
         if (existing != null) {
             existing.setEmployeeId(lecturerCourseClass.getEmployeeId());
-            existing.setCourseSectionId(lecturerCourseClass.getCourseSectionId());
+            existing.setCourseClassId(lecturerCourseClass.getCourseClassId());
             existing.setRole(lecturerCourseClass.getRole());
             existing.setUpdatedAt(LocalDateTime.now());
             return lecturerCourseClassRepository.save(existing);

@@ -7,19 +7,88 @@
     extraScripts=~{::script}
 )}">
 <head>
-    <style></style>
+    <style>
+        /* Additional custom styles for better UX */
+        .student-id-input-wrapper {
+            position: relative;
+        }
+        .student-suggestion {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .student-suggestion.show {
+            display: block;
+        }
+        .student-suggestion-item {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+        .student-suggestion-item:hover {
+            background-color: #e7f1ff;
+        }
+        .student-suggestion-item .student-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .student-suggestion-item .student-email {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        .input-feedback {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .bg-success-subtle {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .bg-warning-subtle {
+            background-color: #fed7aa;
+            color: #9b2c1d;
+        }
+        .bg-secondary-subtle {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        .btn-white {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+        }
+        .btn-white:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
 <body>
     <section>
-        <div class="card border-0">
-            <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
                 <h5 class="mb-0 fw-bold"><i class="bi bi-person-plus-fill me-2 text-primary"></i>Danh sách Đăng ký Học phần</h5>
-                <button class="btn btn-primary" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Ghi danh Sinh viên</button>
+                <button class="btn btn-primary rounded-3" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Ghi danh Sinh viên</button>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead>
+                        <thead class="table-light">
                             <tr>
                                 <th class="ps-4">ID Sinh viên</th>
                                 <th>Lớp học phần (ID)</th>
@@ -40,45 +109,57 @@
             </div>
         </div>
 
-        <!-- CRUD Modal -->
-        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
-            <div class="modal-dialog modal-dialog-centered animate__animated animate__fadeInUp">
+        <!-- CRUD Modal with Student ID Input Field instead of dropdown -->
+        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered modal-md">
                 <div class="modal-content border-0 shadow-lg rounded-4">
-                    <div class="modal-header border-0 pb-0">
+                    <div class="modal-header border-0 bg-light rounded-top-4">
                         <h5 class="modal-title fw-bold" id="modalTitle">Đăng ký Lớp học phần</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="crudForm">
                         <div class="modal-body p-4">
                             <input type="hidden" id="entityId">
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Mã Sinh viên (IDSV)</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control rounded-3" id="studentId" required placeholder="Nhập IDSV (ví dụ: SV001)">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="searchStudent()">
-                                        <i class="bi bi-search"></i> Tìm
-                                    </button>
+                            
+                            <!-- Student ID Input with suggestion feature -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark">Mã số sinh viên <span class="text-danger">*</span></label>
+                                <div class="student-id-input-wrapper">
+                                    <input type="text" 
+                                           class="form-control rounded-3" 
+                                           id="studentIdInput" 
+                                           placeholder="Nhập ID sinh viên (ví dụ: SV001)" 
+                                           autocomplete="off"
+                                           required>
+                                    <div class="student-suggestion" id="studentSuggestion"></div>
                                 </div>
-                                <div id="studentInfo" class="form-text small text-success"></div>
+                                <div class="input-feedback text-muted" id="studentFeedback">
+                                    <i class="bi bi-info-circle-fill me-1 small"></i> Nhập ID hoặc tên sinh viên để tìm kiếm
+                                </div>
+                                <input type="hidden" id="studentId" value="">
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Chọn Lớp học phần</label>
+                            
+                            <!-- Course Section Dropdown (kept as select) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark">Lớp học phần <span class="text-danger">*</span></label>
                                 <select class="form-select rounded-3" id="courseSectionId" required>
-                                    <option value="">-- Tìm lớp học --</option>
+                                    <option value="">-- Chọn lớp học --</option>
                                 </select>
                             </div>
+                            
+                            <!-- Registration Status -->
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Trạng thái đăng ký</label>
+                                <label class="form-label fw-semibold text-dark">Trạng thái đăng ký</label>
                                 <select class="form-select rounded-3" id="status">
-                                    <option value="REGISTERED">Đã ghi danh</option>
-                                    <option value="WAITING">Chờ xác nhận</option>
-                                    <option value="CANCELLED">Hủy đăng ký</option>
+                                    <option value="REGISTERED">✅ Đã ghi danh</option>
+                                    <option value="WAITING">⏳ Chờ xác nhận</option>
+                                    <option value="CANCELLED">❌ Hủy đăng ký</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="modal-footer border-0 pt-0 px-4 pb-4">
-                            <button type="button" class="btn btn-light px-4 rounded-3" data-bs-dismiss="modal">Hủy</button>
-                            <button type="submit" class="btn btn-primary px-4 rounded-3 shadow">Xác nhận ghi danh</button>
+                        <div class="modal-footer border-0 px-4 pb-4 pt-0">
+                            <button type="button" class="btn btn-outline-secondary px-4 rounded-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                            <button type="submit" class="btn btn-primary px-4 rounded-3 shadow-sm">Xác nhận ghi danh</button>
                         </div>
                     </form>
                 </div>
@@ -87,42 +168,187 @@
     </section>
 
     <script th:inline="javascript">
+        // API endpoints
         const API_URL = '/api/student-course-sections';
         const STUDENT_API = '/api/students';
         const COURSE_API = '/api/course-sections';
+        
         let modal;
+        let allStudents = []; // Store all students for suggestion feature
+        let suggestionTimeout = null;
 
-        async function searchStudent() {
-            const idsv = document.getElementById('studentId').value.trim();
-            const infoDiv = document.getElementById('studentInfo');
+        // Helper: API request with error handling
+        async function apiRequest(url, method = 'GET', data = null) {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `HTTP ${response.status}`);
+            }
+            if (method === 'DELETE' || response.status === 204) {
+                return null;
+            }
+            return await response.json();
+        }
+
+        // Load all students for suggestion and validation
+        async function loadAllStudentsForSuggestion() {
+            try {
+                const data = await apiRequest(STUDENT_API);
+                allStudents = Array.isArray(data) ? data : [];
+                return allStudents;
+            } catch (error) {
+                console.error('Error loading students list:', error);
+                allStudents = [];
+                return [];
+            }
+        }
+
+        // Filter students based on input (ID or name)
+        function filterStudents(searchTerm) {
+            if (!searchTerm || searchTerm.trim() === '') {
+                return [];
+            }
+            const term = searchTerm.trim().toLowerCase();
+            return allStudents.filter(student => 
+                student.id?.toString().toLowerCase().includes(term) || 
+                student.name?.toLowerCase().includes(term) ||
+                student.email?.toLowerCase().includes(term)
+            ).slice(0, 8); // Limit to 8 suggestions
+        }
+
+        // Render suggestion dropdown
+        function renderSuggestions(suggestions) {
+            const suggestionBox = document.getElementById('studentSuggestion');
+            const input = document.getElementById('studentIdInput');
             
-            if (!idsv) {
-                infoDiv.innerHTML = '<span class="text-danger">Vui lòng nhập IDSV</span>';
+            if (!suggestions.length) {
+                suggestionBox.classList.remove('show');
+                suggestionBox.innerHTML = '';
                 return;
             }
             
-            try {
-                // Tìm sinh viên theo mã (idsv)
-                const students = await apiRequest(STUDENT_API);
-                const student = students.find(s => s.idsv === idsv || s.code === idsv);
+            suggestionBox.innerHTML = suggestions.map(student => `
+                <div class="student-suggestion-item" data-student-id="${student.id}" data-student-name="${student.name}" data-student-email="${student.email}">
+                    <div class="student-name">${escapeHtml(student.name)}</div>
+                    <div class="student-email">ID: ${student.id} | ${student.email}</div>
+                </div>
+            `).join('');
+            
+            suggestionBox.classList.add('show');
+            
+            // Add click event listeners to suggestions
+            document.querySelectorAll('.student-suggestion-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const studentId = item.getAttribute('data-student-id');
+                    const studentName = item.getAttribute('data-student-name');
+                    input.value = studentId;
+                    document.getElementById('studentId').value = studentId;
+                    document.getElementById('studentFeedback').innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i> Đã chọn: ${escapeHtml(studentName)}`;
+                    document.getElementById('studentFeedback').className = "input-feedback text-success";
+                    suggestionBox.classList.remove('show');
+                });
+            });
+        }
+        
+        // Simple escape function to prevent XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
+
+        // Handle student input with debounced suggestions
+        function setupStudentInputListener() {
+            const studentInput = document.getElementById('studentIdInput');
+            const studentIdHidden = document.getElementById('studentId');
+            const feedbackDiv = document.getElementById('studentFeedback');
+            
+            studentInput.addEventListener('input', (e) => {
+                const value = e.target.value;
+                studentIdHidden.value = ''; // Clear hidden ID when typing
                 
-                if (student) {
-                    infoDiv.innerHTML = `<i class="bi bi-check-circle"></i> Tìm thấy: <strong>${student.name}</strong> (${student.email})`;
-                } else {
-                    infoDiv.innerHTML = '<span class="text-danger">Không tìm thấy sinh viên với ID này</span>';
+                if (suggestionTimeout) clearTimeout(suggestionTimeout);
+                
+                if (value.trim() === '') {
+                    document.getElementById('studentSuggestion').classList.remove('show');
+                    feedbackDiv.innerHTML = `<i class="bi bi-info-circle-fill me-1 small"></i> Nhập ID hoặc tên sinh viên để tìm kiếm`;
+                    feedbackDiv.className = "input-feedback text-muted";
+                    return;
                 }
-            } catch (error) {
-                infoDiv.innerHTML = '<span class="text-danger">Lỗi tìm kiếm sinh viên</span>';
-            }
+                
+                suggestionTimeout = setTimeout(() => {
+                    const suggestions = filterStudents(value);
+                    if (suggestions.length > 0) {
+                        renderSuggestions(suggestions);
+                        feedbackDiv.innerHTML = `<i class="bi bi-search me-1"></i> Tìm thấy ${suggestions.length} sinh viên phù hợp`;
+                        feedbackDiv.className = "input-feedback text-info";
+                    } else {
+                        document.getElementById('studentSuggestion').classList.remove('show');
+                        feedbackDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Không tìm thấy sinh viên với ID hoặc tên: "${escapeHtml(value)}"`;
+                        feedbackDiv.className = "input-feedback text-warning";
+                    }
+                }, 300);
+            });
+            
+            // Close suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!studentInput.contains(e.target) && !document.getElementById('studentSuggestion').contains(e.target)) {
+                    document.getElementById('studentSuggestion').classList.remove('show');
+                }
+            });
+            
+            // Optional: validate on blur if ID exists
+            studentInput.addEventListener('blur', async () => {
+                const enteredValue = studentInput.value.trim();
+                if (enteredValue && !studentIdHidden.value) {
+                    // Try to find exact match by ID
+                    const exactMatch = allStudents.find(s => s.id?.toString() === enteredValue);
+                    if (exactMatch) {
+                        studentIdHidden.value = exactMatch.id;
+                        studentInput.value = exactMatch.id;
+                        feedbackDiv.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i> Đã xác nhận: ${escapeHtml(exactMatch.name)} (${exactMatch.email})`;
+                        feedbackDiv.className = "input-feedback text-success";
+                    } else {
+                        // Not a valid student
+                        feedbackDiv.innerHTML = `<i class="bi bi-x-circle-fill text-danger me-1"></i> ID sinh viên không hợp lệ. Vui lòng chọn từ gợi ý.`;
+                        feedbackDiv.className = "input-feedback text-danger";
+                        studentInput.classList.add('is-invalid');
+                        setTimeout(() => studentInput.classList.remove('is-invalid'), 2000);
+                    }
+                }
+            });
         }
 
         async function loadCourseSections() {
             try {
                 const data = await apiRequest(COURSE_API);
                 const select = document.getElementById('courseSectionId');
-                select.innerHTML = '<option value="">-- Chọn lớp học --</option>' + 
-                    data.map(c => `<option value="${c.id}">${c.code} - ${c.name}</option>`).join('');
-            } catch (error) { console.error('Error loading courses:', error); }
+                if (!data || data.length === 0) {
+                    select.innerHTML = '<option value="">-- Không có lớp học phần nào --</option>';
+                } else {
+                    select.innerHTML = '<option value="">-- Chọn lớp học phần --</option>' + 
+                        data.map(c => `<option value="${c.id}">${c.code || 'Mã lớp'} - ${c.name || c.courseName || 'Tên học phần'} (ID: ${c.id})</option>`).join('');
+                }
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                const select = document.getElementById('courseSectionId');
+                select.innerHTML = '<option value="">-- Lỗi tải dữ liệu --</option>';
+            }
         }
 
         async function loadData() {
@@ -131,7 +357,7 @@
                 const tbody = document.getElementById('data-tbody');
                 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Chưa có sinh viên nào đăng ký</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-1 d-block mb-2"></i>Chưa có sinh viên nào đăng ký</td></tr>';
                     return;
                 }
 
@@ -139,12 +365,14 @@
                     <tr>
                         <td class="ps-4">
                             <div class="fw-bold text-dark">${item.studentId || 'N/A'}</div>
+                            <small class="text-muted">${item.studentName ? escapeHtml(item.studentName) : ''}</small>
                         </td>
                         <td>
                             <div class="fw-medium">${item.courseSectionId || 'N/A'}</div>
+                            <small class="text-muted">${item.courseCode || ''} ${item.courseName ? '-' + escapeHtml(item.courseName) : ''}</small>
                         </td>
-                        <td><small class="text-muted"><i class="bi bi-clock me-1"></i>${item.registeredAt ? new Date(item.registeredAt).toLocaleString('vi-VN') : ''}</small></td>
-                        <td><span class="status-badge ${item.status === 'REGISTERED' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}">${item.status || ''}</span></td>
+                        <td><small class="text-muted"><i class="bi bi-clock me-1"></i>${item.registeredAt ? new Date(item.registeredAt).toLocaleString('vi-VN') : 'N/A'}</small></td>
+                        <td><span class="status-badge ${item.status === 'REGISTERED' ? 'bg-success-subtle text-success' : (item.status === 'WAITING' ? 'bg-warning-subtle text-warning' : 'bg-secondary-subtle text-secondary')}">${item.status === 'REGISTERED' ? 'Đã ghi danh' : (item.status === 'WAITING' ? 'Chờ xác nhận' : 'Hủy đăng ký')}</span></td>
                         <td class="pe-4 text-center">
                             <div class="btn-group shadow-sm rounded-3 overflow-hidden">
                                 <button class="btn btn-sm btn-white border-end" onclick="openModal('${item.id}')" title="Sửa"><i class="bi bi-pencil text-primary"></i></button>
@@ -154,25 +382,46 @@
                     </tr>
                 `).join('');
             } catch (error) {
-                toast.fire({ icon: 'error', title: 'Lỗi tải danh sách đăng ký' });
+                console.error('Load data error:', error);
+                toast.fire({ icon: 'error', title: 'Lỗi tải danh sách đăng ký', text: error.message });
+                document.getElementById('data-tbody').innerHTML = '<tr><td colspan="5" class="text-center py-5 text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Không thể tải dữ liệu</td></tr>';
             }
         }
 
         async function openModal(id = null) {
+            // Reset form
             document.getElementById('crudForm').reset();
             document.getElementById('entityId').value = id || '';
-            document.getElementById('studentInfo').innerHTML = '';
-            document.getElementById('modalTitle').textContent = id ? 'Cập nhật đăng ký' : 'Ghi danh Sinh viên';
+            document.getElementById('studentId').value = '';
+            document.getElementById('studentIdInput').value = '';
+            document.getElementById('studentFeedback').innerHTML = `<i class="bi bi-info-circle-fill me-1 small"></i> Nhập ID hoặc tên sinh viên để tìm kiếm`;
+            document.getElementById('studentFeedback').className = "input-feedback text-muted";
+            document.getElementById('modalTitle').textContent = id ? '✏️ Cập nhật đăng ký' : '➕ Ghi danh Sinh viên';
             
+            // Load students list for suggestions
+            await loadAllStudentsForSuggestion();
             await loadCourseSections();
 
             if (id) {
                 try {
                     const item = await apiRequest(`${API_URL}/${id}`);
-                    document.getElementById('studentId').value = item.studentId || '';
-                    document.getElementById('courseSectionId').value = item.courseSectionId || '';
-                    document.getElementById('status').value = item.status || 'REGISTERED';
+                    if (item) {
+                        // Populate student ID input
+                        document.getElementById('studentId').value = item.studentId || '';
+                        document.getElementById('studentIdInput').value = item.studentId || '';
+                        // Try to fetch student name for better UX
+                        if (item.studentId && allStudents.length) {
+                            const foundStudent = allStudents.find(s => s.id == item.studentId);
+                            if (foundStudent) {
+                                document.getElementById('studentFeedback').innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i> Sinh viên: ${escapeHtml(foundStudent.name)} (${foundStudent.email})`;
+                                document.getElementById('studentFeedback').className = "input-feedback text-success";
+                            }
+                        }
+                        document.getElementById('courseSectionId').value = item.courseSectionId || '';
+                        document.getElementById('status').value = item.status || 'REGISTERED';
+                    }
                 } catch (error) {
+                    console.error('Error loading registration details:', error);
                     toast.fire({ icon: 'error', title: 'Lỗi tải thông tin đăng ký' });
                     return;
                 }
@@ -180,53 +429,109 @@
             modal.show();
         }
 
+        // Handle form submit
         document.getElementById('crudForm').onsubmit = async (e) => {
             e.preventDefault();
+            
             const id = document.getElementById('entityId').value;
+            const studentIdValue = document.getElementById('studentId').value.trim();
+            const courseSectionIdValue = document.getElementById('courseSectionId').value;
+            const statusValue = document.getElementById('status').value;
+            
+            // Validation
+            if (!studentIdValue) {
+                toast.fire({ icon: 'warning', title: 'Vui lòng nhập ID sinh viên hợp lệ' });
+                document.getElementById('studentIdInput').focus();
+                return;
+            }
+            
+            if (!courseSectionIdValue) {
+                toast.fire({ icon: 'warning', title: 'Vui lòng chọn lớp học phần' });
+                return;
+            }
+            
+            // Verify student exists (additional check)
+            const studentExists = allStudents.some(s => s.id?.toString() === studentIdValue.toString());
+            if (!studentExists && id === '') {
+                toast.fire({ icon: 'error', title: 'ID sinh viên không tồn tại trong hệ thống' });
+                return;
+            }
+            
             const data = {
-                studentId: document.getElementById('studentId').value,
-                courseSectionId: document.getElementById('courseSectionId').value,
-                status: document.getElementById('status').value
+                studentId: studentIdValue,
+                courseSectionId: courseSectionIdValue,
+                status: statusValue
             };
-
+            
+            // For update, also send ID
             try {
                 if (id) {
                     await apiRequest(`${API_URL}/${id}`, 'PUT', data);
-                    toast.fire({ icon: 'success', title: 'Đã cập nhật' });
+                    toast.fire({ icon: 'success', title: 'Đã cập nhật đăng ký thành công!' });
                 } else {
                     await apiRequest(API_URL, 'POST', data);
-                    toast.fire({ icon: 'success', title: 'Đã ghi danh thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã ghi danh sinh viên thành công!' });
                 }
                 modal.hide();
                 loadData();
             } catch (error) {
-                toast.fire({ icon: 'error', title: 'Lỗi không thể lưu' });
+                console.error('Save error:', error);
+                let errorMsg = 'Lỗi không thể lưu đăng ký';
+                if (error.message) errorMsg += ': ' + error.message;
+                toast.fire({ icon: 'error', title: errorMsg });
             }
         };
 
         async function deleteItem(id) {
             const result = await Swal.fire({
-                title: 'Hủy đăng ký này?',
+                title: 'Hủy đăng ký học phần?',
+                text: "Bạn có chắc chắn muốn xóa đăng ký này? Hành động này không thể hoàn tác.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
-                confirmButtonText: 'Đồng ý',
+                confirmButtonText: 'Đồng ý, xóa',
                 cancelButtonText: 'Bỏ qua'
             });
 
             if (result.isConfirmed) {
                 try {
                     await apiRequest(`${API_URL}/${id}`, 'DELETE');
-                    toast.fire({ icon: 'success', title: 'Đã xóa đăng ký' });
+                    toast.fire({ icon: 'success', title: 'Đã hủy đăng ký thành công' });
                     loadData();
                 } catch (error) {
-                    toast.fire({ icon: 'error', title: 'Lỗi khi xóa dữ liệu' });
+                    console.error('Delete error:', error);
+                    toast.fire({ icon: 'error', title: 'Lỗi khi xóa dữ liệu', text: error.message });
                 }
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            modal = new bootstrap.Modal(document.getElementById('crudModal'));
+        // Global toast and sweet alert are assumed to be available from layout
+        // If not, define fallback
+        if (typeof toast === 'undefined') {
+            window.toast = {
+                fire: ({ icon, title }) => {
+                    alert(`${icon.toUpperCase()}: ${title}`);
+                }
+            };
+        }
+        if (typeof Swal === 'undefined') {
+            window.Swal = {
+                fire: (options) => {
+                    if (confirm(options.title + '\n' + (options.text || ''))) {
+                        return Promise.resolve({ isConfirmed: true });
+                    }
+                    return Promise.resolve({ isConfirmed: false });
+                }
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            modal = new bootstrap.Modal(document.getElementById('crudModal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+            await loadAllStudentsForSuggestion();
+            setupStudentInputListener();
             loadData();
         });
     </script>

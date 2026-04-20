@@ -58,7 +58,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-muted">Lớp học phần được phân công</label>
-                                <select class="form-select rounded-3" id="courseSectionId" required>
+                                <select class="form-select rounded-3" id="courseClassId" required>
                                     <option value="">-- Chọn lớp học --</option>
                                 </select>
                             </div>
@@ -90,7 +90,7 @@
         async function loadCourseSections() {
             try {
                 const data = await apiRequest(COURSE_API);
-                const select = document.getElementById('courseSectionId');
+                const select = document.getElementById('courseClassId');
                 select.innerHTML = '<option value="">-- Chọn lớp học --</option>' + 
                     data.map(c => `<option value="${c.id}">${c.code} - ${c.name}</option>`).join('');
             } catch (error) { console.error('Error loading courses:', error); }
@@ -138,7 +138,7 @@
                 try {
                     const item = await apiRequest(`${API_URL}/${id}`);
                     document.getElementById('employeeId').value = item.employeeId || '';
-                    document.getElementById('courseSectionId').value = item.courseSectionId || '';
+                    document.getElementById('courseClassId').value = item.courseClassId || '';
                     document.getElementById('role').value = item.role || 'Giảng viên chính';
                 } catch (error) {
                     toast.fire({ icon: 'error', title: 'Lỗi tải thông tin phân công' });
@@ -153,7 +153,7 @@
             const id = document.getElementById('entityId').value;
             const data = {
                 employeeId: document.getElementById('employeeId').value,
-                courseSectionId: document.getElementById('courseSectionId').value,
+                courseClassId: document.getElementById('courseClassId').value,
                 role: document.getElementById('role').value
             };
 
