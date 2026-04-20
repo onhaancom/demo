@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "lecturer_course_classes")
@@ -20,14 +21,23 @@ public class LecturerCourseClass {
     @Column(columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    @Column(columnDefinition = "UNIQUEIDENTIFIER", nullable = false)
     private UUID employeeId;
 
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
-    private UUID courseClassId;
+    @Column(columnDefinition = "UNIQUEIDENTIFIER", nullable = false)
+    private UUID courseSectionId;
 
     @Column(length = 50)
-    private String role;
+    private String role = "LECTURER";
+
+    private Integer teachingHours;
+
+    private Boolean isPrimary = false;
+
+    @Column(length = 500)
+    private String note;
+
+    private Boolean isActive = true;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -38,12 +48,18 @@ public class LecturerCourseClass {
     @Column(columnDefinition = "UNIQUEIDENTIFIER")
     private UUID updatedBy;
 
-    private LocalDateTime deletedAt;
-
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
-    private UUID deletedBy;
-
-    private Boolean isActive = true;
+    // ===== Transient fields for display =====
+    @Transient
+    private String employeeName;
+    
+    @Transient
+    private String employeeCode;
+    
+    @Transient
+    private String courseSectionCode;
+    
+    @Transient
+    private String courseName;
 
     // ===== Constructor =====
     public LecturerCourseClass() {}
@@ -55,11 +71,23 @@ public class LecturerCourseClass {
     public UUID getEmployeeId() { return employeeId; }
     public void setEmployeeId(UUID employeeId) { this.employeeId = employeeId; }
 
-    public UUID getCourseClassId() { return courseClassId; }
-    public void setCourseClassId(UUID courseClassId) { this.courseClassId = courseClassId; }
+    public UUID getCourseSectionId() { return courseSectionId; }
+    public void setCourseSectionId(UUID courseSectionId) { this.courseSectionId = courseSectionId; }
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public Integer getTeachingHours() { return teachingHours; }
+    public void setTeachingHours(Integer teachingHours) { this.teachingHours = teachingHours; }
+
+    public Boolean getIsPrimary() { return isPrimary; }
+    public void setIsPrimary(Boolean isPrimary) { this.isPrimary = isPrimary; }
+
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
@@ -73,12 +101,16 @@ public class LecturerCourseClass {
     public UUID getUpdatedBy() { return updatedBy; }
     public void setUpdatedBy(UUID updatedBy) { this.updatedBy = updatedBy; }
 
-    public LocalDateTime getDeletedAt() { return deletedAt; }
-    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+    // ===== Transient Getters and Setters =====
+    public String getEmployeeName() { return employeeName; }
+    public void setEmployeeName(String employeeName) { this.employeeName = employeeName; }
 
-    public UUID getDeletedBy() { return deletedBy; }
-    public void setDeletedBy(UUID deletedBy) { this.deletedBy = deletedBy; }
+    public String getEmployeeCode() { return employeeCode; }
+    public void setEmployeeCode(String employeeCode) { this.employeeCode = employeeCode; }
 
-    public Boolean getIsActive() { return isActive; }
-    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    public String getCourseSectionCode() { return courseSectionCode; }
+    public void setCourseSectionCode(String courseSectionCode) { this.courseSectionCode = courseSectionCode; }
+
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
 }

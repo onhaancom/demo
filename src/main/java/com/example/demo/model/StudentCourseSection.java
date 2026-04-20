@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "student_course_sections")
@@ -20,19 +22,32 @@ public class StudentCourseSection {
     @Column(columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    @Column(columnDefinition = "UNIQUEIDENTIFIER", nullable = false)
     private UUID studentId;
 
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    @Column(columnDefinition = "UNIQUEIDENTIFIER", nullable = false)
     private UUID courseSectionId;
 
     @Column(length = 50)
-    private String status;
+    private String status = "PENDING";
 
-    private LocalDateTime registeredAt;
+    private LocalDateTime registrationDate;
 
-    @Column(length = 255)
+    private LocalDateTime approvedDate;
+
+    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    private UUID approvedBy;
+
+    @Column(length = 10)
+    private String grade;
+
+    @Column(precision = 5, scale = 2)
+    private BigDecimal gradeScore;
+
+    @Column(length = 500)
     private String note;
+
+    private Boolean isActive = true;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -43,12 +58,18 @@ public class StudentCourseSection {
     @Column(columnDefinition = "UNIQUEIDENTIFIER")
     private UUID updatedBy;
 
-    private LocalDateTime deletedAt;
-
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
-    private UUID deletedBy;
-
-    private Boolean isActive = true;
+    // ===== Transient fields for display =====
+    @Transient
+    private String studentName;
+    
+    @Transient
+    private String studentCode;
+    
+    @Transient
+    private String courseSectionCode;
+    
+    @Transient
+    private String courseName;
 
     // ===== Constructor =====
     public StudentCourseSection() {}
@@ -66,11 +87,26 @@ public class StudentCourseSection {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public LocalDateTime getRegisteredAt() { return registeredAt; }
-    public void setRegisteredAt(LocalDateTime registeredAt) { this.registeredAt = registeredAt; }
+    public LocalDateTime getRegistrationDate() { return registrationDate; }
+    public void setRegistrationDate(LocalDateTime registrationDate) { this.registrationDate = registrationDate; }
+
+    public LocalDateTime getApprovedDate() { return approvedDate; }
+    public void setApprovedDate(LocalDateTime approvedDate) { this.approvedDate = approvedDate; }
+
+    public UUID getApprovedBy() { return approvedBy; }
+    public void setApprovedBy(UUID approvedBy) { this.approvedBy = approvedBy; }
+
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
+
+    public BigDecimal getGradeScore() { return gradeScore; }
+    public void setGradeScore(BigDecimal gradeScore) { this.gradeScore = gradeScore; }
 
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
@@ -84,12 +120,16 @@ public class StudentCourseSection {
     public UUID getUpdatedBy() { return updatedBy; }
     public void setUpdatedBy(UUID updatedBy) { this.updatedBy = updatedBy; }
 
-    public LocalDateTime getDeletedAt() { return deletedAt; }
-    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+    // ===== Transient Getters and Setters =====
+    public String getStudentName() { return studentName; }
+    public void setStudentName(String studentName) { this.studentName = studentName; }
 
-    public UUID getDeletedBy() { return deletedBy; }
-    public void setDeletedBy(UUID deletedBy) { this.deletedBy = deletedBy; }
+    public String getStudentCode() { return studentCode; }
+    public void setStudentCode(String studentCode) { this.studentCode = studentCode; }
 
-    public Boolean getIsActive() { return isActive; }
-    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    public String getCourseSectionCode() { return courseSectionCode; }
+    public void setCourseSectionCode(String courseSectionCode) { this.courseSectionCode = courseSectionCode; }
+
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
 }

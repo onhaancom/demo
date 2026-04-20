@@ -18,7 +18,7 @@ public class SchoolYearService {
     private SchoolYearRepository schoolYearRepository;
 
     public List<SchoolYear> getAll() {
-        return schoolYearRepository.findAll();
+        return schoolYearRepository.findByIsActiveTrue();
     }
 
     public List<SchoolYear> getAllActive() {
@@ -42,10 +42,12 @@ public class SchoolYearService {
         if (existing != null) {
             existing.setCode(schoolYear.getCode());
             existing.setName(schoolYear.getName());
+            existing.setStartYear(schoolYear.getStartYear());
+            existing.setEndYear(schoolYear.getEndYear());
             existing.setDescription(schoolYear.getDescription());
-            existing.setNote(schoolYear.getNote());
             existing.setStartDate(schoolYear.getStartDate());
             existing.setEndDate(schoolYear.getEndDate());
+            existing.setIsCurrent(schoolYear.getIsCurrent());
             existing.setUpdatedAt(LocalDateTime.now());
             return schoolYearRepository.save(existing);
         }
@@ -56,7 +58,6 @@ public class SchoolYearService {
     public void delete(UUID id) {
         SchoolYear schoolYear = schoolYearRepository.findById(id).orElse(null);
         if (schoolYear != null) {
-            schoolYear.setDeletedAt(LocalDateTime.now());
             schoolYear.setIsActive(false);
             schoolYearRepository.save(schoolYear);
         }

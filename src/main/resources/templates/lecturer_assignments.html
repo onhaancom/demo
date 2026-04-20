@@ -21,7 +21,7 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-4">Giảng viên (ID)</th>
+                                <th class="ps-4">Giảng viên</th>
                                 <th>Lớp học phần</th>
                                 <th>Tên môn</th>
                                 <th>Vai trò</th>
@@ -52,22 +52,27 @@
                         <div class="modal-body">
                             <input type="hidden" id="entityId">
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">ID Giảng viên / Nhân viên</label>
-                                <input type="text" class="form-control" id="employeeId" required placeholder="Nhập UUID nhân viên">
-                                <div class="form-text small">Tạm thời nhập UUID của người dùng hệ thống.</div>
+                                <label class="form-label fw-semibold">ID Giảng viên</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="employeeId" required placeholder="Nhập UUID giảng viên">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="lookupEmployee()">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                                <div id="employeeNameDisplay" class="form-text text-success fw-semibold"></div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Lớp học phần</label>
-                                <select class="form-select" id="courseClassId" required>
+                                <select class="form-select" id="courseSectionId" required>
                                     <option value="">-- Chọn lớp học --</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Vai trò</label>
                                 <select class="form-select" id="role">
-                                    <option value="Giảng viên chính">Giảng viên chính</option>
-                                    <option value="Trợ giảng">Trợ giảng</option>
-                                    <option value="Cố vấn">Cố vấn học tập</option>
+                                    <option value="LECTURER">Giảng viên chính</option>
+                                    <option value="TA">Trợ giảng</option>
+                                    <option value="CO_LECTURER">Cố giảng viên</option>
                                 </select>
                             </div>
                         </div>
@@ -85,14 +90,83 @@
         const API_URL = '/api/lecturer-course-classes';
         const DASHBOARD_API = '/api/dashboard/lecturer-assignments';
         const COURSE_API = '/api/course-sections';
+        const EMPLOYEE_API = '/api/employees';
         let modal;
+
+        let employeesCache = [];
+
+        async function loadEmployees() {
+            try {
+                employeesCache = await apiRequest(EMPLOYEE_API);
+            } catch (error) { console.error('Error loading employees:', error); }
+        }
+
+        async function lookupEmployee() {
+            const input = document.getElementById('employeeId').value.trim();
+            const display = document.getElementById('employeeNameDisplay');
+            
+            if (!input) {
+                display.innerHTML = '';
+                return;
+            }
+            
+            // Check if input is UUID or Code (GV001)
+            let employee = null;
+            
+            // Try to find by UUID first
+            employee = employeesCache.find(e => e.id === input);
+            
+            // If not found, try to find by code
+            if (!employee) {
+                employee = employeesCache.find(e => e.code && e.code.toLowerCase() === input.toLowerCase());
+            }
+            
+            if (employee) {
+                display.innerHTML = `✓ ${employee.firstName} ${employee.lastName} (${employee.code})`;
+                return;
+            }
+            
+            // Try to fetch from API by UUID
+            try {
+                employee = await apiRequest(`${EMPLOYEE_API}/${input}`);
+                if (employee && employee.id) {
+                    display.innerHTML = `✓ ${employee.firstName} ${employee.lastName} (${employee.code})`;
+                    if (!employeesCache.find(e => e.id === employee.id)) {
+                        employeesCache.push(employee);
+                    }
+                    return;
+                }
+            } catch (error) {
+                // UUID not found, try to search by code
+            }
+            
+            // Try to search by code via API
+            try {
+                const allEmployees = await apiRequest(EMPLOYEE_API);
+                employee = allEmployees.find(e => e.code && e.code.toLowerCase() === input.toLowerCase());
+                if (employee) {
+                    display.innerHTML = `✓ ${employee.firstName} ${employee.lastName} (${employee.code})`;
+                    if (!employeesCache.find(e => e.id === employee.id)) {
+                        employeesCache.push(employee);
+                    }
+                    return;
+                }
+            } catch (error) {
+                console.error('Error searching employee:', error);
+            }
+            
+            display.innerHTML = '<span class="text-danger">Không tìm thấy giảng viên</span>';
+        }
+
+        // Auto-lookup when pasting or pressing enter
+        document.getElementById('employeeId').addEventListener('blur', lookupEmployee);
 
         async function loadCourseSections() {
             try {
                 const data = await apiRequest(COURSE_API);
-                const select = document.getElementById('courseClassId');
+                const select = document.getElementById('courseSectionId');
                 select.innerHTML = '<option value="">-- Chọn lớp học --</option>' + 
-                    data.map(c => `<option value="${c.id}">${c.code} - ${c.name}</option>`).join('');
+                    data.map(c => `<option value="${c.id}">${c.code} - ${c.name || c.courseName}</option>`).join('');
             } catch (error) { console.error('Error loading courses:', error); }
         }
 
@@ -109,10 +183,10 @@
 
                 tbody.innerHTML = data.map(item => `
                     <tr>
-                        <td class="ps-4 fw-medium text-primary">${item.maGV || 'N/A'}</td>
-                        <td>${item.maLop || 'N/A'}</td>
-                        <td>${item.tenMon || ''}</td>
-                        <td><span class="badge bg-info-subtle text-info border border-info-subtle px-3">${item.vaiTro || ''}</span></td>
+                        <td class="ps-4 fw-medium text-primary">${item.employeeName || item.employeeCode || 'N/A'}</td>
+                        <td>${item.courseSectionCode || 'N/A'}</td>
+                        <td>${item.courseName || ''}</td>
+                        <td><span class="badge bg-info-subtle text-info border border-info-subtle px-3">${item.role === 'LECTURER' ? 'Giảng viên chính' : item.role === 'TA' ? 'Trợ giảng' : item.role === 'CO_LECTURER' ? 'Cố giảng viên' : item.role || ''}</span></td>
                         <td class="pe-4 text-center">
                             <button class="btn btn-sm btn-info-subtle action-btn text-info me-1" onclick="openModal('${item.id}')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
                             <button class="btn btn-sm btn-danger-subtle action-btn text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
@@ -129,14 +203,15 @@
             document.getElementById('entityId').value = id || '';
             document.getElementById('modalTitle').textContent = id ? 'Chỉnh sửa phân công' : 'Phân công giảng dạy';
             
-            await loadCourseSections();
+            await Promise.all([loadEmployees(), loadCourseSections()]);
+            document.getElementById('employeeNameDisplay').innerHTML = '';
 
             if (id) {
                 try {
                     const item = await apiRequest(`${API_URL}/${id}`);
                     document.getElementById('employeeId').value = item.employeeId || '';
-                    document.getElementById('courseClassId').value = item.courseClassId || '';
-                    document.getElementById('role').value = item.role || 'Giảng viên chính';
+                    document.getElementById('courseSectionId').value = item.courseSectionId || '';
+                    document.getElementById('role').value = item.role || 'LECTURER';
                 } catch (error) {
                     toast.fire({ icon: 'error', title: 'Lỗi khi tải thông tin' });
                     return;
@@ -150,7 +225,7 @@
             const id = document.getElementById('entityId').value;
             const data = {
                 employeeId: document.getElementById('employeeId').value,
-                courseClassId: document.getElementById('courseClassId').value,
+                courseSectionId: document.getElementById('courseSectionId').value,
                 role: document.getElementById('role').value
             };
 

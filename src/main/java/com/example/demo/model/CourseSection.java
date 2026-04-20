@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "course_sections")
@@ -20,38 +21,41 @@ public class CourseSection {
     @Column(columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(length = 100)
+    @Column(length = 50, nullable = false, unique = true)
     private String code;
 
     @Column(length = 255)
     private String name;
 
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    @Column(columnDefinition = "UNIQUEIDENTIFIER", nullable = false)
     private UUID courseId;
 
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    @Column(columnDefinition = "UNIQUEIDENTIFIER", nullable = false)
     private UUID semesterId;
+
+    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    private UUID lecturerId;
 
     @Column(columnDefinition = "UNIQUEIDENTIFIER")
     private UUID roomId;
 
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
-    private UUID buildingId;
+    private Integer maxStudents = 50;
+    private Integer minStudents = 5;
+    private Integer currentStudents = 0;
 
-    private Integer maxStudents;
-    private Integer minStudents;
-
-    @Column(length = 255)
+    @Column(length = 50)
     private String classType;
 
     @Column(length = 50)
-    private String status;
+    private String status = "OPEN";
 
-    private LocalDateTime registrationStart;
-    private LocalDateTime registrationEnd;
+    @Column(length = 500)
+    private String scheduleInfo;
 
-    @Column(length = 255)
+    @Column(length = 500)
     private String note;
+
+    private Boolean isActive = true;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -62,12 +66,15 @@ public class CourseSection {
     @Column(columnDefinition = "UNIQUEIDENTIFIER")
     private UUID updatedBy;
 
-    private LocalDateTime deletedAt;
-
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
-    private UUID deletedBy;
-
-    private Boolean isActive = true;
+    // ===== Transient fields for display (not stored in DB) =====
+    @Transient
+    private String courseName;
+    @Transient
+    private String semesterName;
+    @Transient
+    private String lecturerName;
+    @Transient
+    private String roomName;
 
     // ===== Constructor =====
     public CourseSection() {}
@@ -88,11 +95,11 @@ public class CourseSection {
     public UUID getSemesterId() { return semesterId; }
     public void setSemesterId(UUID semesterId) { this.semesterId = semesterId; }
 
+    public UUID getLecturerId() { return lecturerId; }
+    public void setLecturerId(UUID lecturerId) { this.lecturerId = lecturerId; }
+
     public UUID getRoomId() { return roomId; }
     public void setRoomId(UUID roomId) { this.roomId = roomId; }
-
-    public UUID getBuildingId() { return buildingId; }
-    public void setBuildingId(UUID buildingId) { this.buildingId = buildingId; }
 
     public Integer getMaxStudents() { return maxStudents; }
     public void setMaxStudents(Integer maxStudents) { this.maxStudents = maxStudents; }
@@ -100,20 +107,23 @@ public class CourseSection {
     public Integer getMinStudents() { return minStudents; }
     public void setMinStudents(Integer minStudents) { this.minStudents = minStudents; }
 
+    public Integer getCurrentStudents() { return currentStudents; }
+    public void setCurrentStudents(Integer currentStudents) { this.currentStudents = currentStudents; }
+
     public String getClassType() { return classType; }
     public void setClassType(String classType) { this.classType = classType; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public LocalDateTime getRegistrationStart() { return registrationStart; }
-    public void setRegistrationStart(LocalDateTime registrationStart) { this.registrationStart = registrationStart; }
-
-    public LocalDateTime getRegistrationEnd() { return registrationEnd; }
-    public void setRegistrationEnd(LocalDateTime registrationEnd) { this.registrationEnd = registrationEnd; }
+    public String getScheduleInfo() { return scheduleInfo; }
+    public void setScheduleInfo(String scheduleInfo) { this.scheduleInfo = scheduleInfo; }
 
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
@@ -127,12 +137,16 @@ public class CourseSection {
     public UUID getUpdatedBy() { return updatedBy; }
     public void setUpdatedBy(UUID updatedBy) { this.updatedBy = updatedBy; }
 
-    public LocalDateTime getDeletedAt() { return deletedAt; }
-    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+    // ===== Transient Getters and Setters =====
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
 
-    public UUID getDeletedBy() { return deletedBy; }
-    public void setDeletedBy(UUID deletedBy) { this.deletedBy = deletedBy; }
+    public String getSemesterName() { return semesterName; }
+    public void setSemesterName(String semesterName) { this.semesterName = semesterName; }
 
-    public Boolean getIsActive() { return isActive; }
-    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    public String getLecturerName() { return lecturerName; }
+    public void setLecturerName(String lecturerName) { this.lecturerName = lecturerName; }
+
+    public String getRoomName() { return roomName; }
+    public void setRoomName(String roomName) { this.roomName = roomName; }
 }

@@ -52,10 +52,14 @@
                         <div class="modal-body">
                             <input type="hidden" id="entityId">
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Sinh viên</label>
-                                <select class="form-select" id="studentId" required>
-                                    <option value="">-- Chọn sinh viên --</option>
-                                </select>
+                                <label class="form-label fw-semibold">ID Sinh viên</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="studentId" required placeholder="Nhập UUID sinh viên">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="lookupStudent()">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                                <div id="studentNameDisplay" class="form-text text-success fw-semibold"></div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Lớp học phần</label>
@@ -66,8 +70,9 @@
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Trạng thái</label>
                                 <select class="form-select" id="status">
-                                    <option value="REGISTERED">Đã đăng ký</option>
-                                    <option value="WAITING">Chờ duyệt</option>
+                                    <option value="PENDING">Chờ duyệt</option>
+                                    <option value="APPROVED">Đã duyệt</option>
+                                    <option value="REJECTED">Từ chối</option>
                                     <option value="CANCELLED">Đã hủy</option>
                                 </select>
                             </div>
@@ -88,21 +93,80 @@
         const COURSE_API = '/api/course-sections';
         let modal;
 
+        let studentsCache = [];
+
         async function loadStudents() {
             try {
-                const data = await apiRequest(STUDENT_API);
-                const select = document.getElementById('studentId');
-                select.innerHTML = '<option value="">-- Chọn sinh viên --</option>' + 
-                    data.map(s => `<option value="${s.id}">${s.name} (${s.email})</option>`).join('');
+                studentsCache = await apiRequest(STUDENT_API);
             } catch (error) { console.error('Error loading students:', error); }
         }
+
+        async function lookupStudent() {
+            const input = document.getElementById('studentId').value.trim();
+            const display = document.getElementById('studentNameDisplay');
+            
+            if (!input) {
+                display.innerHTML = '';
+                return;
+            }
+            
+            // Check if input is UUID or Code (SV001)
+            let student = null;
+            
+            // Try to find by UUID first
+            student = studentsCache.find(s => s.id === input);
+            
+            // If not found, try to find by code
+            if (!student) {
+                student = studentsCache.find(s => s.code && s.code.toLowerCase() === input.toLowerCase());
+            }
+            
+            if (student) {
+                display.innerHTML = `✓ ${student.firstName} ${student.lastName} (${student.code})`;
+                return;
+            }
+            
+            // Try to fetch from API by UUID
+            try {
+                student = await apiRequest(`${STUDENT_API}/${input}`);
+                if (student && student.id) {
+                    display.innerHTML = `✓ ${student.firstName} ${student.lastName} (${student.code})`;
+                    if (!studentsCache.find(s => s.id === student.id)) {
+                        studentsCache.push(student);
+                    }
+                    return;
+                }
+            } catch (error) {
+                // UUID not found, try to search by code
+            }
+            
+            // Try to search by code via API (need to filter from all students)
+            try {
+                const allStudents = await apiRequest(STUDENT_API);
+                student = allStudents.find(s => s.code && s.code.toLowerCase() === input.toLowerCase());
+                if (student) {
+                    display.innerHTML = `✓ ${student.firstName} ${student.lastName} (${student.code})`;
+                    if (!studentsCache.find(s => s.id === student.id)) {
+                        studentsCache.push(student);
+                    }
+                    return;
+                }
+            } catch (error) {
+                console.error('Error searching student:', error);
+            }
+            
+            display.innerHTML = '<span class="text-danger">Không tìm thấy sinh viên</span>';
+        }
+
+        // Auto-lookup when pasting or pressing enter
+        document.getElementById('studentId').addEventListener('blur', lookupStudent);
 
         async function loadCourseSections() {
             try {
                 const data = await apiRequest(COURSE_API);
                 const select = document.getElementById('courseSectionId');
                 select.innerHTML = '<option value="">-- Chọn lớp học --</option>' + 
-                    data.map(c => `<option value="${c.id}">${c.code} - ${c.name}</option>`).join('');
+                    data.map(c => `<option value="${c.id}">${c.code} - ${c.name || c.courseName}</option>`).join('');
             } catch (error) { console.error('Error loading courses:', error); }
         }
 
@@ -118,10 +182,10 @@
 
                 tbody.innerHTML = data.map(item => `
                     <tr>
-                        <td class="ps-4 fw-medium text-primary">${item.studentId || 'N/A'}</td>
-                        <td>${item.courseSectionId || 'N/A'}</td>
-                        <td>${item.registeredAt ? new Date(item.registeredAt).toLocaleString('vi-VN') : ''}</td>
-                        <td><span class="status-badge ${item.status === 'REGISTERED' ? 'bg-primary-subtle text-primary' : 'bg-warning-subtle text-warning'}">${item.status || ''}</span></td>
+                        <td class="ps-4 fw-medium text-primary">${item.studentName || item.studentCode || 'N/A'}</td>
+                        <td>${item.courseSectionCode || 'N/A'}</td>
+                        <td>${item.registrationDate ? new Date(item.registrationDate).toLocaleString('vi-VN') : ''}</td>
+                        <td><span class="status-badge ${item.status === 'APPROVED' ? 'bg-success-subtle text-success' : item.status === 'PENDING' ? 'bg-warning-subtle text-warning' : 'bg-secondary-subtle text-secondary'}">${item.status === 'APPROVED' ? 'Đã duyệt' : item.status === 'PENDING' ? 'Chờ duyệt' : item.status === 'REJECTED' ? 'Từ chối' : item.status === 'CANCELLED' ? 'Đã hủy' : item.status || ''}</span></td>
                         <td class="pe-4 text-center">
                             <button class="btn btn-sm btn-info-subtle action-btn text-info me-1" onclick="openModal('${item.id}')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
                             <button class="btn btn-sm btn-danger-subtle action-btn text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
@@ -139,6 +203,7 @@
             document.getElementById('modalTitle').textContent = id ? 'Chỉnh sửa đăng ký' : 'Đăng ký lớp học';
             
             await Promise.all([loadStudents(), loadCourseSections()]);
+            document.getElementById('studentNameDisplay').innerHTML = '';
 
             if (id) {
                 try {

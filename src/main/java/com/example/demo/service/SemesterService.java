@@ -18,7 +18,7 @@ public class SemesterService {
     private SemesterRepository semesterRepository;
 
     public List<Semester> getAll() {
-        return semesterRepository.findAll();
+        return semesterRepository.findByIsActiveTrue();
     }
 
     public List<Semester> getAllActive() {
@@ -46,10 +46,14 @@ public class SemesterService {
         if (existing != null) {
             existing.setCode(semester.getCode());
             existing.setName(semester.getName());
+            existing.setSemesterOrder(semester.getSemesterOrder());
             existing.setSchoolYearId(semester.getSchoolYearId());
-            existing.setSchoolYearName(semester.getSchoolYearName());
             existing.setStartDate(semester.getStartDate());
             existing.setEndDate(semester.getEndDate());
+            existing.setRegistrationStart(semester.getRegistrationStart());
+            existing.setRegistrationEnd(semester.getRegistrationEnd());
+            existing.setDescription(semester.getDescription());
+            existing.setIsCurrent(semester.getIsCurrent());
             existing.setUpdatedAt(LocalDateTime.now());
             return semesterRepository.save(existing);
         }
@@ -60,7 +64,6 @@ public class SemesterService {
     public void delete(UUID id) {
         Semester semester = semesterRepository.findById(id).orElse(null);
         if (semester != null) {
-            semester.setDeletedAt(LocalDateTime.now());
             semester.setIsActive(false);
             semesterRepository.save(semester);
         }

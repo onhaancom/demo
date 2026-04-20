@@ -6,13 +6,19 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.example.demo.model.CourseSection;
 
+@Repository
 public interface CourseSectionRepository extends JpaRepository<CourseSection, UUID> {
     List<CourseSection> findByIsActiveTrue();
     List<CourseSection> findBySemesterId(UUID semesterId);
+    List<CourseSection> findByCourseId(UUID courseId);
     List<CourseSection> findByCodeContainingIgnoreCase(String code);
+    boolean existsByCode(String code);
+    List<CourseSection> findByStatus(String status);
+    List<CourseSection> findByLecturerId(UUID lecturerId);
     
     @Query("SELECT cs FROM CourseSection cs WHERE cs.isActive = true AND cs.semesterId = :semesterId")
     List<CourseSection> findActiveBySemesterId(@Param("semesterId") UUID semesterId);

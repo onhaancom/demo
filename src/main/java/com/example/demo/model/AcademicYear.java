@@ -21,20 +21,27 @@ public class AcademicYear {
     @Column(columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(length = 50)
+    @Column(length = 50, nullable = false, unique = true)
     private String code;
 
-    @Column(length = 100)
+    @Column(length = 100, nullable = false)
     private String name;
 
     @Column(length = 20)
     private String year;
 
-    @Column(length = 255)
-    private String description;
+    private Integer startYear;
+    private Integer endYear;
 
     private LocalDate startDate;
     private LocalDate endDate;
+
+    @Column(length = 500)
+    private String description;
+
+    private Boolean isCurrent = false;
+
+    private Boolean isActive = true;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -44,13 +51,6 @@ public class AcademicYear {
 
     @Column(columnDefinition = "UNIQUEIDENTIFIER")
     private UUID updatedBy;
-
-    private LocalDateTime deletedAt;
-
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
-    private UUID deletedBy;
-
-    private Boolean isActive = true;
 
     // ===== Constructor =====
     public AcademicYear() {}
@@ -68,14 +68,26 @@ public class AcademicYear {
     public String getYear() { return year; }
     public void setYear(String year) { this.year = year; }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public Integer getStartYear() { return startYear; }
+    public void setStartYear(Integer startYear) { this.startYear = startYear; }
+
+    public Integer getEndYear() { return endYear; }
+    public void setEndYear(Integer endYear) { this.endYear = endYear; }
 
     public LocalDate getStartDate() { return startDate; }
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
 
     public LocalDate getEndDate() { return endDate; }
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Boolean getIsCurrent() { return isCurrent; }
+    public void setIsCurrent(Boolean isCurrent) { this.isCurrent = isCurrent; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
@@ -88,13 +100,4 @@ public class AcademicYear {
 
     public UUID getUpdatedBy() { return updatedBy; }
     public void setUpdatedBy(UUID updatedBy) { this.updatedBy = updatedBy; }
-
-    public LocalDateTime getDeletedAt() { return deletedAt; }
-    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
-
-    public UUID getDeletedBy() { return deletedBy; }
-    public void setDeletedBy(UUID deletedBy) { this.deletedBy = deletedBy; }
-
-    public Boolean getIsActive() { return isActive; }
-    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }
