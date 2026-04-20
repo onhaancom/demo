@@ -11,22 +11,22 @@
 </head>
 <body>
     <section>
-        <div class="card border-0 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center py-3 bg-white">
-                <h5 class="card-title mb-0 fw-bold"><i class="bi bi-book me-2 text-primary"></i>Danh sách Lớp học phần</h5>
-                <button class="btn btn-primary px-4 shadow-sm" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Thêm mới</button>
+        <div class="card border-0">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>Danh sách Lớp học phần</h5>
+                <button class="btn btn-primary" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Mở Lớp học phần mới</button>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
                                 <th class="ps-4">Mã lớp</th>
-                                <th>Tên môn</th>
-                                <th>Sĩ số (Max/Min)</th>
-                                <th>Trạng thái</th>
+                                <th>Tiêu đề môn học</th>
+                                <th>Sĩ số (Tối đa)</th>
                                 <th>Đăng ký (Bắt đầu)</th>
                                 <th>Đăng ký (Kết thúc)</th>
+                                <th>Trạng thái</th>
                                 <th class="pe-4 text-center">Thao tác</th>
                             </tr>
                         </thead>
@@ -43,79 +43,73 @@
         </div>
 
         <!-- CRUD Modal -->
-        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content border-0 shadow">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="modalTitle">Thêm Lớp học phần</h5>
+        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+            <div class="modal-dialog modal-lg modal-dialog-centered animate__animated animate__fadeInUp">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="modalTitle">Thiết lập Lớp học phần</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="crudForm">
-                        <div class="modal-body">
+                        <div class="modal-body p-4">
                             <input type="hidden" id="entityId">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Học kỳ</label>
-                                    <select class="form-select" id="semesterId" required>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted">Học kỳ áp dụng</label>
+                                    <select class="form-select rounded-3" id="semesterId" required>
                                         <option value="">-- Chọn học kỳ --</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Loại lớp</label>
-                                    <select class="form-select" id="classType">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted">Phân loại lớp</label>
+                                    <select class="form-select rounded-3" id="classType">
                                         <option value="Lý thuyết">Lý thuyết</option>
                                         <option value="Thực hành">Thực hành</option>
                                         <option value="Đồ án">Đồ án</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-semibold">Mã lớp</label>
-                                    <input type="text" class="form-control" id="code" required>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-muted">Mã lớp</label>
+                                    <input type="text" class="form-control rounded-3" id="code" required placeholder="VD: CS101.H1">
                                 </div>
-                                <div class="col-md-8 mb-3">
-                                    <label class="form-label fw-semibold">Tên môn học / Lớp</label>
-                                    <input type="text" class="form-control" id="name" required>
+                                <div class="col-md-8">
+                                    <label class="form-label small fw-bold text-muted">Tên môn học / Tên lớp</label>
+                                    <input type="text" class="form-control rounded-3" id="name" required placeholder="VD: Lập trình Java - Nhóm 1">
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-semibold">Sĩ số tối đa</label>
-                                    <input type="number" class="form-control" id="maxStudents" required value="40">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-muted">Sĩ số tối đa</label>
+                                    <input type="number" class="form-control rounded-3" id="maxStudents" required value="40">
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-semibold">Sĩ số tối thiểu</label>
-                                    <input type="number" class="form-control" id="minStudents" required value="10">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-muted">Sĩ số tối thiểu</label>
+                                    <input type="number" class="form-control rounded-3" id="minStudents" required value="10">
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-semibold">Trạng thái</label>
-                                    <select class="form-select" id="status">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-muted">Trạng thái vận hành</label>
+                                    <select class="form-select rounded-3" id="status">
                                         <option value="OPEN">Mở đăng ký</option>
                                         <option value="CLOSED">Đóng đăng ký</option>
                                         <option value="IN_PROGRESS">Đang học</option>
                                         <option value="COMPLETED">Đã kết thúc</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Bắt đầu đăng ký</label>
-                                    <input type="datetime-local" class="form-control" id="registrationStart" required>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted">Thời gian Bắt đầu đăng ký</label>
+                                    <input type="datetime-local" class="form-control rounded-3" id="registrationStart" required>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Kết thúc đăng ký</label>
-                                    <input type="datetime-local" class="form-control" id="registrationEnd" required>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted">Thời gian Kết thúc đăng ký</label>
+                                    <input type="datetime-local" class="form-control rounded-3" id="registrationEnd" required>
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Ghi chú</label>
-                                <textarea class="form-control" id="note" rows="2"></textarea>
+                                <div class="col-12">
+                                    <label class="form-label small fw-bold text-muted">Ghi chú bổ sung</label>
+                                    <textarea class="form-control rounded-3" id="note" rows="2" placeholder="Thông tinh phụ..."></textarea>
+                                </div>
                             </div>
                         </div>
-                        <div class="modal-footer bg-light px-4">
-                            <button type="button" class="btn btn-light border px-4" data-bs-dismiss="modal">Hủy</button>
-                            <button type="submit" class="btn btn-primary px-4 shadow-sm">Lưu lại</button>
+                        <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                            <button type="button" class="btn btn-light px-4 rounded-3" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary px-4 rounded-3 shadow">Lưu lại</button>
                         </div>
                     </form>
                 </div>
@@ -145,33 +139,45 @@
                 const tbody = document.getElementById('data-tbody');
                 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted">Không có dữ liệu</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted">Chưa có lớp học phần nào được thiết lập</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = data.map(item => `
-                    <tr>
-                        <td class="ps-4 fw-medium text-primary">${item.code || ''}</td>
-                        <td>${item.name || ''}</td>
-                        <td><span class="badge bg-light text-dark border">${item.maxStudents || 0} / ${item.minStudents || 0}</span></td>
-                        <td><span class="status-badge ${item.status === 'OPEN' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}">${item.status || ''}</span></td>
-                        <td><small>${item.registrationStart ? item.registrationStart.replace('T', ' ') : ''}</small></td>
-                        <td><small>${item.registrationEnd ? item.registrationEnd.replace('T', ' ') : ''}</small></td>
-                        <td class="pe-4 text-center">
-                            <button class="btn btn-sm btn-info-subtle action-btn text-info me-1" onclick="openModal('${item.id}')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-sm btn-danger-subtle action-btn text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
-                        </td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = data.map(item => {
+                    let statusClass = 'bg-secondary-subtle text-secondary';
+                    if (item.status === 'OPEN') statusClass = 'bg-success-subtle text-success';
+                    if (item.status === 'IN_PROGRESS') statusClass = 'bg-primary-subtle text-primary';
+                    if (item.status === 'CLOSED') statusClass = 'bg-warning-subtle text-warning';
+
+                    return `
+                        <tr>
+                            <td class="ps-4 fw-bold text-primary">${item.code || ''}</td>
+                            <td>
+                                <div class="fw-medium">${item.name || ''}</div>
+                                <div class="small text-muted">${item.classType || ''}</div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">${item.maxStudents || 0} SV</span></td>
+                            <td><small class="text-muted"><i class="bi bi-calendar-check me-1"></i>${item.registrationStart ? item.registrationStart.replace('T', ' ') : ''}</small></td>
+                            <td><small class="text-muted"><i class="bi bi-calendar-x me-1"></i>${item.registrationEnd ? item.registrationEnd.replace('T', ' ') : ''}</small></td>
+                            <td><span class="status-badge ${statusClass}">${item.status || ''}</span></td>
+                            <td class="pe-4 text-center">
+                                <div class="btn-group shadow-sm rounded-3 overflow-hidden">
+                                    <button class="btn btn-sm btn-white border-end" onclick="openModal('${item.id}')" title="Sửa"><i class="bi bi-pencil text-primary"></i></button>
+                                    <button class="btn btn-sm btn-white text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             } catch (error) {
-                toast.fire({ icon: 'error', title: 'Lỗi khi tải danh sách' });
+                toast.fire({ icon: 'error', title: 'Lỗi tải danh sách lớp' });
             }
         }
 
         async function openModal(id = null) {
             document.getElementById('crudForm').reset();
             document.getElementById('entityId').value = id || '';
-            document.getElementById('modalTitle').textContent = id ? 'Chỉnh sửa Lớp học phần' : 'Thêm Lớp học phần';
+            document.getElementById('modalTitle').textContent = id ? 'Cập nhật Lớp học phần' : 'Thiết lập Lớp học phần mới';
             
             await loadSemesters();
 
@@ -189,7 +195,7 @@
                     document.getElementById('registrationEnd').value = item.registrationEnd ? item.registrationEnd.substring(0, 16) : '';
                     document.getElementById('note').value = item.note || '';
                 } catch (error) {
-                    toast.fire({ icon: 'error', title: 'Lỗi khi tải thông tin' });
+                    toast.fire({ icon: 'error', title: 'Lỗi tải thông tin' });
                     return;
                 }
             }
@@ -215,26 +221,24 @@
             try {
                 if (id) {
                     await apiRequest(`${API_URL}/${id}`, 'PUT', data);
-                    toast.fire({ icon: 'success', title: 'Cập nhật thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã cập nhật' });
                 } else {
                     await apiRequest(API_URL, 'POST', data);
-                    toast.fire({ icon: 'success', title: 'Thêm mới thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã thêm mới' });
                 }
                 modal.hide();
                 loadData();
             } catch (error) {
-                toast.fire({ icon: 'error', title: 'Lỗi khi lưu dữ liệu' });
+                toast.fire({ icon: 'error', title: 'Lỗi không thể lưu' });
             }
         };
 
         async function deleteItem(id) {
             const result = await Swal.fire({
-                title: 'Xác nhận xóa?',
-                text: "Bạn không thể hoàn tác hành động này!",
+                title: 'Xác nhận xóa lớp này?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                confirmButtonColor: '#ef4444',
                 confirmButtonText: 'Đồng ý',
                 cancelButtonText: 'Hủy'
             });

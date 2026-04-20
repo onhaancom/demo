@@ -11,19 +11,19 @@
 </head>
 <body>
     <section>
-        <div class="card border-0 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center py-3 bg-white">
-                <h5 class="card-title mb-0 fw-bold"><i class="bi bi-person-plus me-2 text-primary"></i>Danh sách Đăng ký</h5>
-                <button class="btn btn-primary px-4 shadow-sm" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Thêm mới</button>
+        <div class="card border-0">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-person-plus-fill me-2 text-primary"></i>Danh sách Đăng ký Học phần</h5>
+                <button class="btn btn-primary" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Ghi danh Sinh viên</button>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
-                                <th class="ps-4">Học viên</th>
-                                <th>Lớp học phần</th>
-                                <th>Ngày đăng ký</th>
+                                <th class="ps-4">ID Sinh viên</th>
+                                <th>Lớp học phần (ID)</th>
+                                <th>Thời điểm đăng ký</th>
                                 <th>Trạng thái</th>
                                 <th class="pe-4 text-center">Thao tác</th>
                             </tr>
@@ -41,40 +41,44 @@
         </div>
 
         <!-- CRUD Modal -->
-        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="modalTitle">Đăng ký lớp học</h5>
+        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+            <div class="modal-dialog modal-dialog-centered animate__animated animate__fadeInUp">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="modalTitle">Đăng ký Lớp học phần</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="crudForm">
-                        <div class="modal-body">
+                        <div class="modal-body p-4">
                             <input type="hidden" id="entityId">
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Sinh viên</label>
-                                <select class="form-select" id="studentId" required>
-                                    <option value="">-- Chọn sinh viên --</option>
+                                <label class="form-label small fw-bold text-muted">Mã Sinh viên (IDSV)</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control rounded-3" id="studentId" required placeholder="Nhập IDSV (ví dụ: SV001)">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="searchStudent()">
+                                        <i class="bi bi-search"></i> Tìm
+                                    </button>
+                                </div>
+                                <div id="studentInfo" class="form-text small text-success"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Chọn Lớp học phần</label>
+                                <select class="form-select rounded-3" id="courseSectionId" required>
+                                    <option value="">-- Tìm lớp học --</option>
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Lớp học phần</label>
-                                <select class="form-select" id="courseSectionId" required>
-                                    <option value="">-- Chọn lớp học --</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Trạng thái</label>
-                                <select class="form-select" id="status">
-                                    <option value="REGISTERED">Đã đăng ký</option>
-                                    <option value="WAITING">Chờ duyệt</option>
-                                    <option value="CANCELLED">Đã hủy</option>
+                                <label class="form-label small fw-bold text-muted">Trạng thái đăng ký</label>
+                                <select class="form-select rounded-3" id="status">
+                                    <option value="REGISTERED">Đã ghi danh</option>
+                                    <option value="WAITING">Chờ xác nhận</option>
+                                    <option value="CANCELLED">Hủy đăng ký</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="modal-footer bg-light px-4">
-                            <button type="button" class="btn btn-light border px-4" data-bs-dismiss="modal">Hủy</button>
-                            <button type="submit" class="btn btn-primary px-4 shadow-sm">Xác nhận</button>
+                        <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                            <button type="button" class="btn btn-light px-4 rounded-3" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary px-4 rounded-3 shadow">Xác nhận ghi danh</button>
                         </div>
                     </form>
                 </div>
@@ -88,13 +92,28 @@
         const COURSE_API = '/api/course-sections';
         let modal;
 
-        async function loadStudents() {
+        async function searchStudent() {
+            const idsv = document.getElementById('studentId').value.trim();
+            const infoDiv = document.getElementById('studentInfo');
+            
+            if (!idsv) {
+                infoDiv.innerHTML = '<span class="text-danger">Vui lòng nhập IDSV</span>';
+                return;
+            }
+            
             try {
-                const data = await apiRequest(STUDENT_API);
-                const select = document.getElementById('studentId');
-                select.innerHTML = '<option value="">-- Chọn sinh viên --</option>' + 
-                    data.map(s => `<option value="${s.id}">${s.name} (${s.email})</option>`).join('');
-            } catch (error) { console.error('Error loading students:', error); }
+                // Tìm sinh viên theo mã (idsv)
+                const students = await apiRequest(STUDENT_API);
+                const student = students.find(s => s.idsv === idsv || s.code === idsv);
+                
+                if (student) {
+                    infoDiv.innerHTML = `<i class="bi bi-check-circle"></i> Tìm thấy: <strong>${student.name}</strong> (${student.email})`;
+                } else {
+                    infoDiv.innerHTML = '<span class="text-danger">Không tìm thấy sinh viên với ID này</span>';
+                }
+            } catch (error) {
+                infoDiv.innerHTML = '<span class="text-danger">Lỗi tìm kiếm sinh viên</span>';
+            }
         }
 
         async function loadCourseSections() {
@@ -112,33 +131,40 @@
                 const tbody = document.getElementById('data-tbody');
                 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Không có dữ liệu</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Chưa có sinh viên nào đăng ký</td></tr>';
                     return;
                 }
 
                 tbody.innerHTML = data.map(item => `
                     <tr>
-                        <td class="ps-4 fw-medium text-primary">${item.studentId || 'N/A'}</td>
-                        <td>${item.courseSectionId || 'N/A'}</td>
-                        <td>${item.registeredAt ? new Date(item.registeredAt).toLocaleString('vi-VN') : ''}</td>
-                        <td><span class="status-badge ${item.status === 'REGISTERED' ? 'bg-primary-subtle text-primary' : 'bg-warning-subtle text-warning'}">${item.status || ''}</span></td>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">${item.studentId || 'N/A'}</div>
+                        </td>
+                        <td>
+                            <div class="fw-medium">${item.courseSectionId || 'N/A'}</div>
+                        </td>
+                        <td><small class="text-muted"><i class="bi bi-clock me-1"></i>${item.registeredAt ? new Date(item.registeredAt).toLocaleString('vi-VN') : ''}</small></td>
+                        <td><span class="status-badge ${item.status === 'REGISTERED' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}">${item.status || ''}</span></td>
                         <td class="pe-4 text-center">
-                            <button class="btn btn-sm btn-info-subtle action-btn text-info me-1" onclick="openModal('${item.id}')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-sm btn-danger-subtle action-btn text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
+                            <div class="btn-group shadow-sm rounded-3 overflow-hidden">
+                                <button class="btn btn-sm btn-white border-end" onclick="openModal('${item.id}')" title="Sửa"><i class="bi bi-pencil text-primary"></i></button>
+                                <button class="btn btn-sm btn-white text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
+                            </div>
                         </td>
                     </tr>
                 `).join('');
             } catch (error) {
-                toast.fire({ icon: 'error', title: 'Lỗi khi tải danh sách' });
+                toast.fire({ icon: 'error', title: 'Lỗi tải danh sách đăng ký' });
             }
         }
 
         async function openModal(id = null) {
             document.getElementById('crudForm').reset();
             document.getElementById('entityId').value = id || '';
-            document.getElementById('modalTitle').textContent = id ? 'Chỉnh sửa đăng ký' : 'Đăng ký lớp học';
+            document.getElementById('studentInfo').innerHTML = '';
+            document.getElementById('modalTitle').textContent = id ? 'Cập nhật đăng ký' : 'Ghi danh Sinh viên';
             
-            await Promise.all([loadStudents(), loadCourseSections()]);
+            await loadCourseSections();
 
             if (id) {
                 try {
@@ -147,7 +173,7 @@
                     document.getElementById('courseSectionId').value = item.courseSectionId || '';
                     document.getElementById('status').value = item.status || 'REGISTERED';
                 } catch (error) {
-                    toast.fire({ icon: 'error', title: 'Lỗi khi tải thông tin' });
+                    toast.fire({ icon: 'error', title: 'Lỗi tải thông tin đăng ký' });
                     return;
                 }
             }
@@ -166,34 +192,32 @@
             try {
                 if (id) {
                     await apiRequest(`${API_URL}/${id}`, 'PUT', data);
-                    toast.fire({ icon: 'success', title: 'Cập nhật thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã cập nhật' });
                 } else {
                     await apiRequest(API_URL, 'POST', data);
-                    toast.fire({ icon: 'success', title: 'Thêm mới thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã ghi danh thành công' });
                 }
                 modal.hide();
                 loadData();
             } catch (error) {
-                toast.fire({ icon: 'error', title: 'Lỗi khi lưu dữ liệu' });
+                toast.fire({ icon: 'error', title: 'Lỗi không thể lưu' });
             }
         };
 
         async function deleteItem(id) {
             const result = await Swal.fire({
-                title: 'Xác nhận xóa?',
-                text: "Bạn không thể hoàn tác hành động này!",
+                title: 'Hủy đăng ký này?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                confirmButtonColor: '#ef4444',
                 confirmButtonText: 'Đồng ý',
-                cancelButtonText: 'Hủy'
+                cancelButtonText: 'Bỏ qua'
             });
 
             if (result.isConfirmed) {
                 try {
                     await apiRequest(`${API_URL}/${id}`, 'DELETE');
-                    toast.fire({ icon: 'success', title: 'Đã xóa thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã xóa đăng ký' });
                     loadData();
                 } catch (error) {
                     toast.fire({ icon: 'error', title: 'Lỗi khi xóa dữ liệu' });

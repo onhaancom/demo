@@ -11,20 +11,20 @@
 </head>
 <body>
     <section>
-        <div class="card border-0 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center py-3 bg-white">
-                <h5 class="card-title mb-0 fw-bold"><i class="bi bi-person-badge me-2 text-primary"></i>Danh sách Phân công</h5>
-                <button class="btn btn-primary px-4 shadow-sm" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Thêm mới</button>
+        <div class="card border-0">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge-fill me-2 text-primary"></i>Danh sách Phân công Giảng dạy</h5>
+                <button class="btn btn-primary" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Phân công Mới</button>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
-                                <th class="ps-4">Giảng viên (ID)</th>
+                                <th class="ps-4">Giảng viên / ID</th>
                                 <th>Lớp học phần</th>
-                                <th>Tên môn</th>
-                                <th>Vai trò</th>
+                                <th>Tên môn học</th>
+                                <th>Vai trò phân công</th>
                                 <th class="pe-4 text-center">Thao tác</th>
                             </tr>
                         </thead>
@@ -41,39 +41,39 @@
         </div>
 
         <!-- CRUD Modal -->
-        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="modalTitle">Phân công giảng dạy</h5>
+        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+            <div class="modal-dialog modal-dialog-centered animate__animated animate__fadeInUp">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="modalTitle">Thiết lập Phân công</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="crudForm">
-                        <div class="modal-body">
+                        <div class="modal-body p-4">
                             <input type="hidden" id="entityId">
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">ID Giảng viên / Nhân viên</label>
-                                <input type="text" class="form-control" id="employeeId" required placeholder="Nhập UUID nhân viên">
-                                <div class="form-text small">Tạm thời nhập UUID của người dùng hệ thống.</div>
+                                <label class="form-label small fw-bold text-muted">ID Giảng viên / Nhân viên</label>
+                                <input type="text" class="form-control rounded-3" id="employeeId" required placeholder="Nhập UUID giảng viên">
+                                <div class="form-text small">Tạm thời nhập UUID từ hệ thống nhân sự.</div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Lớp học phần</label>
-                                <select class="form-select" id="courseClassId" required>
+                                <label class="form-label small fw-bold text-muted">Lớp học phần được phân công</label>
+                                <select class="form-select rounded-3" id="courseSectionId" required>
                                     <option value="">-- Chọn lớp học --</option>
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Vai trò</label>
-                                <select class="form-select" id="role">
+                                <label class="form-label small fw-bold text-muted">Vai trò trong lớp</label>
+                                <select class="form-select rounded-3" id="role">
                                     <option value="Giảng viên chính">Giảng viên chính</option>
                                     <option value="Trợ giảng">Trợ giảng</option>
                                     <option value="Cố vấn">Cố vấn học tập</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="modal-footer bg-light px-4">
-                            <button type="button" class="btn btn-light border px-4" data-bs-dismiss="modal">Hủy</button>
-                            <button type="submit" class="btn btn-primary px-4 shadow-sm">Xác nhận</button>
+                        <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                            <button type="button" class="btn btn-light px-4 rounded-3" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary px-4 rounded-3 shadow">Lưu phân công</button>
                         </div>
                     </form>
                 </div>
@@ -90,7 +90,7 @@
         async function loadCourseSections() {
             try {
                 const data = await apiRequest(COURSE_API);
-                const select = document.getElementById('courseClassId');
+                const select = document.getElementById('courseSectionId');
                 select.innerHTML = '<option value="">-- Chọn lớp học --</option>' + 
                     data.map(c => `<option value="${c.id}">${c.code} - ${c.name}</option>`).join('');
             } catch (error) { console.error('Error loading courses:', error); }
@@ -98,36 +98,39 @@
 
         async function loadData() {
             try {
-                // Use dashboard API for more complete list data
                 const data = await apiRequest(DASHBOARD_API);
                 const tbody = document.getElementById('data-tbody');
                 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Không có dữ liệu</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Chưa có giảng viên nào được phân công</td></tr>';
                     return;
                 }
 
                 tbody.innerHTML = data.map(item => `
                     <tr>
-                        <td class="ps-4 fw-medium text-primary">${item.maGV || 'N/A'}</td>
-                        <td>${item.maLop || 'N/A'}</td>
-                        <td>${item.tenMon || ''}</td>
-                        <td><span class="badge bg-info-subtle text-info border border-info-subtle px-3">${item.vaiTro || ''}</span></td>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">${item.maGV || 'N/A'}</div>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">${item.maLop || 'N/A'}</span></td>
+                        <td class="fw-medium">${item.tenMon || ''}</td>
+                        <td><span class="status-badge bg-info-subtle text-info">${item.vaiTro || ''}</span></td>
                         <td class="pe-4 text-center">
-                            <button class="btn btn-sm btn-info-subtle action-btn text-info me-1" onclick="openModal('${item.id}')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-sm btn-danger-subtle action-btn text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
+                            <div class="btn-group shadow-sm rounded-3 overflow-hidden">
+                                <button class="btn btn-sm btn-white border-end" onclick="openModal('${item.id}')" title="Sửa"><i class="bi bi-pencil text-primary"></i></button>
+                                <button class="btn btn-sm btn-white text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
+                            </div>
                         </td>
                     </tr>
                 `).join('');
             } catch (error) {
-                toast.fire({ icon: 'error', title: 'Lỗi khi tải danh sách' });
+                toast.fire({ icon: 'error', title: 'Lỗi tải danh sách phân công' });
             }
         }
 
         async function openModal(id = null) {
             document.getElementById('crudForm').reset();
             document.getElementById('entityId').value = id || '';
-            document.getElementById('modalTitle').textContent = id ? 'Chỉnh sửa phân công' : 'Phân công giảng dạy';
+            document.getElementById('modalTitle').textContent = id ? 'Cập nhật phân công' : 'Phân công Giảng dạy';
             
             await loadCourseSections();
 
@@ -135,10 +138,10 @@
                 try {
                     const item = await apiRequest(`${API_URL}/${id}`);
                     document.getElementById('employeeId').value = item.employeeId || '';
-                    document.getElementById('courseClassId').value = item.courseClassId || '';
+                    document.getElementById('courseSectionId').value = item.courseSectionId || '';
                     document.getElementById('role').value = item.role || 'Giảng viên chính';
                 } catch (error) {
-                    toast.fire({ icon: 'error', title: 'Lỗi khi tải thông tin' });
+                    toast.fire({ icon: 'error', title: 'Lỗi tải thông tin phân công' });
                     return;
                 }
             }
@@ -150,41 +153,39 @@
             const id = document.getElementById('entityId').value;
             const data = {
                 employeeId: document.getElementById('employeeId').value,
-                courseClassId: document.getElementById('courseClassId').value,
+                courseSectionId: document.getElementById('courseSectionId').value,
                 role: document.getElementById('role').value
             };
 
             try {
                 if (id) {
                     await apiRequest(`${API_URL}/${id}`, 'PUT', data);
-                    toast.fire({ icon: 'success', title: 'Cập nhật thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã cập nhật' });
                 } else {
                     await apiRequest(API_URL, 'POST', data);
-                    toast.fire({ icon: 'success', title: 'Thêm mới thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã phân công thành công' });
                 }
                 modal.hide();
                 loadData();
             } catch (error) {
-                toast.fire({ icon: 'error', title: 'Lỗi khi lưu dữ liệu' });
+                toast.fire({ icon: 'error', title: 'Lỗi không thể lưu' });
             }
         };
 
         async function deleteItem(id) {
             const result = await Swal.fire({
-                title: 'Xác nhận xóa?',
-                text: "Bạn không thể hoàn tác hành động này!",
+                title: 'Hủy phân công này?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                confirmButtonColor: '#ef4444',
                 confirmButtonText: 'Đồng ý',
-                cancelButtonText: 'Hủy'
+                cancelButtonText: 'Bỏ qua'
             });
 
             if (result.isConfirmed) {
                 try {
                     await apiRequest(`${API_URL}/${id}`, 'DELETE');
-                    toast.fire({ icon: 'success', title: 'Đã xóa thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã hủy phân công' });
                     loadData();
                 } catch (error) {
                     toast.fire({ icon: 'error', title: 'Lỗi khi xóa dữ liệu' });

@@ -121,12 +121,12 @@ public class DashboardApiController {
             Map<String, Object> item = new HashMap<>();
             item.put("id", lcc.getId());
             item.put("maGV", lcc.getEmployeeId());
-            item.put("maLopHocPhan", lcc.getCourseClassId());
+            item.put("maLopHocPhan", lcc.getCourseSectionId());
             item.put("vaiTro", lcc.getRole());
             
             // Lấy thông tin lớp học phần
-            if (lcc.getCourseClassId() != null) {
-                courseSectionRepository.findById(lcc.getCourseClassId()).ifPresent(cs -> {
+            if (lcc.getCourseSectionId() != null) {
+                courseSectionRepository.findById(lcc.getCourseSectionId()).ifPresent(cs -> {
                     item.put("maLop", cs.getCode());
                     item.put("tenMon", cs.getName());
                 });

@@ -124,6 +124,12 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Disable modal backdrops as requested */
+        .modal-backdrop {
+            display: none !important;
+            visibility: hidden !important;
+        }
     </style>
     <th:block th:if="${extraStyles != null}">
         <th:block th:replace="${extraStyles}"></th:block>
@@ -239,7 +245,7 @@
 
         <!-- Main Content -->
         <main class="app-main p-4">
-            <div class="container-fluid animate__animated animate__fadeIn">
+            <div class="container-fluid">
                 <div class="row align-items-center mb-4">
                     <div class="col-md-6">
                         <h2 class="fw-bold mb-1" th:text="${pageTitle}">Page Title</h2>
@@ -301,6 +307,15 @@
             timerProgressBar: true,
             background: '#ffffff',
             color: '#1e293b'
+        });
+
+        // Global Modal Backdrop Fix
+        document.addEventListener('hidden.bs.modal', function () {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(b => b.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.paddingRight = '';
+            document.body.style.overflow = '';
         });
     </script>
     <th:block th:if="${extraScripts != null}">
