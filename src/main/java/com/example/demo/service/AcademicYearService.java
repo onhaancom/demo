@@ -1,0 +1,64 @@
+package com.example.demo.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.model.AcademicYear;
+import com.example.demo.repository.AcademicYearRepository;
+
+@Service
+public class AcademicYearService {
+
+    @Autowired
+    private AcademicYearRepository academicYearRepository;
+
+    public List<AcademicYear> getAll() {
+        return academicYearRepository.findAll();
+    }
+
+    public List<AcademicYear> getAllActive() {
+        return academicYearRepository.findByIsActiveTrue();
+    }
+
+    public AcademicYear getById(UUID id) {
+        return academicYearRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
+    public AcademicYear create(AcademicYear academicYear) {
+        academicYear.setCreatedAt(LocalDateTime.now());
+        academicYear.setIsActive(true);
+        return academicYearRepository.save(academicYear);
+    }
+
+    @Transactional
+    public AcademicYear update(UUID id, AcademicYear academicYear) {
+        AcademicYear existing = academicYearRepository.findById(id).orElse(null);
+        if (existing != null) {
+            existing.setCode(academicYear.getCode());
+            existing.setName(academicYear.getName());
+            existing.setYear(academicYear.getYear());
+            existing.setDescription(academicYear.getDescription());
+            existing.setStartDate(academicYear.getStartDate());
+            existing.setEndDate(academicYear.getEndDate());
+            existing.setUpdatedAt(LocalDateTime.now());
+            return academicYearRepository.save(existing);
+        }
+        return null;
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        AcademicYear academicYear = academicYearRepository.findById(id).orElse(null);
+        if (academicYear != null) {
+            academicYear.setDeletedAt(LocalDateTime.now());
+            academicYear.setIsActive(false);
+            academicYearRepository.save(academicYear);
+        }
+    }
+}

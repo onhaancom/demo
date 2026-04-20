@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: html(
+    activePage='student-registrations',
+    pageTitle='Đăng ký Sinh viên',
+    content=~{::section},
+    extraStyles=~{::style},
+    extraScripts=~{::script}
+)}">
+<head>
+    <style></style>
+</head>
+<body>
+    <section>
+        <div class="card border-0 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center py-3 bg-white">
+                <h5 class="card-title mb-0 fw-bold"><i class="bi bi-person-plus me-2 text-primary"></i>Danh sách Đăng ký</h5>
+                <button class="btn btn-primary px-4 shadow-sm" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Thêm mới</button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Học viên</th>
+                                <th>Lớp học phần</th>
+                                <th>Ngày đăng ký</th>
+                                <th>Trạng thái</th>
+                                <th class="pe-4 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-tbody">
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CRUD Modal -->
+        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="modalTitle">Đăng ký lớp học</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="crudForm">
+                        <div class="modal-body">
+                            <input type="hidden" id="entityId">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Sinh viên</label>
+                                <select class="form-select" id="studentId" required>
+                                    <option value="">-- Chọn sinh viên --</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Lớp học phần</label>
+                                <select class="form-select" id="courseSectionId" required>
+                                    <option value="">-- Chọn lớp học --</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Trạng thái</label>
+                                <select class="form-select" id="status">
+                                    <option value="REGISTERED">Đã đăng ký</option>
+                                    <option value="WAITING">Chờ duyệt</option>
+                                    <option value="CANCELLED">Đã hủy</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light px-4">
+                            <button type="button" class="btn btn-light border px-4" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm">Xác nhận</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script th:inline="javascript">
+        const API_URL = '/api/student-course-sections';
+        const STUDENT_API = '/api/students';
+        const COURSE_API = '/api/course-sections';
+        let modal;
+
+        async function loadStudents() {
+            try {
+                const data = await apiRequest(STUDENT_API);
+                const select = document.getElementById('studentId');
+                select.innerHTML = '<option value="">-- Chọn sinh viên --</option>' + 
+                    data.map(s => `<option value="${s.id}">${s.name} (${s.email})</option>`).join('');
+            } catch (error) { console.error('Error loading students:', error); }
+        }
+
+        async function loadCourseSections() {
+            try {
+                const data = await apiRequest(COURSE_API);
+                const select = document.getElementById('courseSectionId');
+                select.innerHTML = '<option value="">-- Chọn lớp học --</option>' + 
+                    data.map(c => `<option value="${c.id}">${c.code} - ${c.name}</option>`).join('');
+            } catch (error) { console.error('Error loading courses:', error); }
+        }
+
+        async function loadData() {
+            try {
+                const data = await apiRequest(API_URL);
+                const tbody = document.getElementById('data-tbody');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Không có dữ liệu</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td class="ps-4 fw-medium text-primary">${item.studentId || 'N/A'}</td>
+                        <td>${item.courseSectionId || 'N/A'}</td>
+                        <td>${item.registeredAt ? new Date(item.registeredAt).toLocaleString('vi-VN') : ''}</td>
+                        <td><span class="status-badge ${item.status === 'REGISTERED' ? 'bg-primary-subtle text-primary' : 'bg-warning-subtle text-warning'}">${item.status || ''}</span></td>
+                        <td class="pe-4 text-center">
+                            <button class="btn btn-sm btn-info-subtle action-btn text-info me-1" onclick="openModal('${item.id}')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-sm btn-danger-subtle action-btn text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                toast.fire({ icon: 'error', title: 'Lỗi khi tải danh sách' });
+            }
+        }
+
+        async function openModal(id = null) {
+            document.getElementById('crudForm').reset();
+            document.getElementById('entityId').value = id || '';
+            document.getElementById('modalTitle').textContent = id ? 'Chỉnh sửa đăng ký' : 'Đăng ký lớp học';
+            
+            await Promise.all([loadStudents(), loadCourseSections()]);
+
+            if (id) {
+                try {
+                    const item = await apiRequest(`${API_URL}/${id}`);
+                    document.getElementById('studentId').value = item.studentId || '';
+                    document.getElementById('courseSectionId').value = item.courseSectionId || '';
+                    document.getElementById('status').value = item.status || 'REGISTERED';
+                } catch (error) {
+                    toast.fire({ icon: 'error', title: 'Lỗi khi tải thông tin' });
+                    return;
+                }
+            }
+            modal.show();
+        }
+
+        document.getElementById('crudForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('entityId').value;
+            const data = {
+                studentId: document.getElementById('studentId').value,
+                courseSectionId: document.getElementById('courseSectionId').value,
+                status: document.getElementById('status').value
+            };
+
+            try {
+                if (id) {
+                    await apiRequest(`${API_URL}/${id}`, 'PUT', data);
+                    toast.fire({ icon: 'success', title: 'Cập nhật thành công' });
+                } else {
+                    await apiRequest(API_URL, 'POST', data);
+                    toast.fire({ icon: 'success', title: 'Thêm mới thành công' });
+                }
+                modal.hide();
+                loadData();
+            } catch (error) {
+                toast.fire({ icon: 'error', title: 'Lỗi khi lưu dữ liệu' });
+            }
+        };
+
+        async function deleteItem(id) {
+            const result = await Swal.fire({
+                title: 'Xác nhận xóa?',
+                text: "Bạn không thể hoàn tác hành động này!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await apiRequest(`${API_URL}/${id}`, 'DELETE');
+                    toast.fire({ icon: 'success', title: 'Đã xóa thành công' });
+                    loadData();
+                } catch (error) {
+                    toast.fire({ icon: 'error', title: 'Lỗi khi xóa dữ liệu' });
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            modal = new bootstrap.Modal(document.getElementById('crudModal'));
+            loadData();
+        });
+    </script>
+</body>
+</html>

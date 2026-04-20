@@ -1,0 +1,15 @@
+Endpoint
+Mô tả
+GET /api/school-years
+Danh sách năm học
+GET /api/semesters
+Danh sách học kỳ
+GET /api/course-sections
+Danh sách lớp học phần
+GET /api/student-course-sections
+Danh sách đăng ký sinh viên
+GET /api/lecturer-course-classes
+Danh sách phân công giảng viên
+GET /api/academic-years
+Danh sách năm
+

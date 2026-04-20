@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: html(
+    activePage='course-sections',
+    pageTitle='Quản lý Lớp học phần',
+    content=~{::section},
+    extraStyles=~{::style},
+    extraScripts=~{::script}
+)}">
+<head>
+    <style></style>
+</head>
+<body>
+    <section>
+        <div class="card border-0 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center py-3 bg-white">
+                <h5 class="card-title mb-0 fw-bold"><i class="bi bi-book me-2 text-primary"></i>Danh sách Lớp học phần</h5>
+                <button class="btn btn-primary px-4 shadow-sm" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Thêm mới</button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Mã lớp</th>
+                                <th>Tên môn</th>
+                                <th>Sĩ số (Max/Min)</th>
+                                <th>Trạng thái</th>
+                                <th>Đăng ký (Bắt đầu)</th>
+                                <th>Đăng ký (Kết thúc)</th>
+                                <th class="pe-4 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-tbody">
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CRUD Modal -->
+        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="modalTitle">Thêm Lớp học phần</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="crudForm">
+                        <div class="modal-body">
+                            <input type="hidden" id="entityId">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Học kỳ</label>
+                                    <select class="form-select" id="semesterId" required>
+                                        <option value="">-- Chọn học kỳ --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Loại lớp</label>
+                                    <select class="form-select" id="classType">
+                                        <option value="Lý thuyết">Lý thuyết</option>
+                                        <option value="Thực hành">Thực hành</option>
+                                        <option value="Đồ án">Đồ án</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">Mã lớp</label>
+                                    <input type="text" class="form-control" id="code" required>
+                                </div>
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label fw-semibold">Tên môn học / Lớp</label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">Sĩ số tối đa</label>
+                                    <input type="number" class="form-control" id="maxStudents" required value="40">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">Sĩ số tối thiểu</label>
+                                    <input type="number" class="form-control" id="minStudents" required value="10">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">Trạng thái</label>
+                                    <select class="form-select" id="status">
+                                        <option value="OPEN">Mở đăng ký</option>
+                                        <option value="CLOSED">Đóng đăng ký</option>
+                                        <option value="IN_PROGRESS">Đang học</option>
+                                        <option value="COMPLETED">Đã kết thúc</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Bắt đầu đăng ký</label>
+                                    <input type="datetime-local" class="form-control" id="registrationStart" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Kết thúc đăng ký</label>
+                                    <input type="datetime-local" class="form-control" id="registrationEnd" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Ghi chú</label>
+                                <textarea class="form-control" id="note" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light px-4">
+                            <button type="button" class="btn btn-light border px-4" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm">Lưu lại</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script th:inline="javascript">
+        const API_URL = '/api/course-sections';
+        const SEMESTER_API = '/api/semesters';
+        let modal;
+
+        async function loadSemesters() {
+            try {
+                const semesters = await apiRequest(SEMESTER_API);
+                const select = document.getElementById('semesterId');
+                select.innerHTML = '<option value="">-- Chọn học kỳ --</option>' + 
+                    semesters.map(s => `<option value="${s.id}">${s.name} (${s.schoolYearName})</option>`).join('');
+            } catch (error) {
+                console.error('Error loading semesters:', error);
+            }
+        }
+
+        async function loadData() {
+            try {
+                const data = await apiRequest(API_URL);
+                const tbody = document.getElementById('data-tbody');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted">Không có dữ liệu</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td class="ps-4 fw-medium text-primary">${item.code || ''}</td>
+                        <td>${item.name || ''}</td>
+                        <td><span class="badge bg-light text-dark border">${item.maxStudents || 0} / ${item.minStudents || 0}</span></td>
+                        <td><span class="status-badge ${item.status === 'OPEN' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}">${item.status || ''}</span></td>
+                        <td><small>${item.registrationStart ? item.registrationStart.replace('T', ' ') : ''}</small></td>
+                        <td><small>${item.registrationEnd ? item.registrationEnd.replace('T', ' ') : ''}</small></td>
+                        <td class="pe-4 text-center">
+                            <button class="btn btn-sm btn-info-subtle action-btn text-info me-1" onclick="openModal('${item.id}')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-sm btn-danger-subtle action-btn text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                toast.fire({ icon: 'error', title: 'Lỗi khi tải danh sách' });
+            }
+        }
+
+        async function openModal(id = null) {
+            document.getElementById('crudForm').reset();
+            document.getElementById('entityId').value = id || '';
+            document.getElementById('modalTitle').textContent = id ? 'Chỉnh sửa Lớp học phần' : 'Thêm Lớp học phần';
+            
+            await loadSemesters();
+
+            if (id) {
+                try {
+                    const item = await apiRequest(`${API_URL}/${id}`);
+                    document.getElementById('semesterId').value = item.semesterId || '';
+                    document.getElementById('code').value = item.code || '';
+                    document.getElementById('name').value = item.name || '';
+                    document.getElementById('maxStudents').value = item.maxStudents || 40;
+                    document.getElementById('minStudents').value = item.minStudents || 10;
+                    document.getElementById('classType').value = item.classType || 'Lý thuyết';
+                    document.getElementById('status').value = item.status || 'OPEN';
+                    document.getElementById('registrationStart').value = item.registrationStart ? item.registrationStart.substring(0, 16) : '';
+                    document.getElementById('registrationEnd').value = item.registrationEnd ? item.registrationEnd.substring(0, 16) : '';
+                    document.getElementById('note').value = item.note || '';
+                } catch (error) {
+                    toast.fire({ icon: 'error', title: 'Lỗi khi tải thông tin' });
+                    return;
+                }
+            }
+            modal.show();
+        }
+
+        document.getElementById('crudForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('entityId').value;
+            const data = {
+                semesterId: document.getElementById('semesterId').value,
+                code: document.getElementById('code').value,
+                name: document.getElementById('name').value,
+                maxStudents: parseInt(document.getElementById('maxStudents').value),
+                minStudents: parseInt(document.getElementById('minStudents').value),
+                classType: document.getElementById('classType').value,
+                status: document.getElementById('status').value,
+                registrationStart: document.getElementById('registrationStart').value,
+                registrationEnd: document.getElementById('registrationEnd').value,
+                note: document.getElementById('note').value
+            };
+
+            try {
+                if (id) {
+                    await apiRequest(`${API_URL}/${id}`, 'PUT', data);
+                    toast.fire({ icon: 'success', title: 'Cập nhật thành công' });
+                } else {
+                    await apiRequest(API_URL, 'POST', data);
+                    toast.fire({ icon: 'success', title: 'Thêm mới thành công' });
+                }
+                modal.hide();
+                loadData();
+            } catch (error) {
+                toast.fire({ icon: 'error', title: 'Lỗi khi lưu dữ liệu' });
+            }
+        };
+
+        async function deleteItem(id) {
+            const result = await Swal.fire({
+                title: 'Xác nhận xóa?',
+                text: "Bạn không thể hoàn tác hành động này!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await apiRequest(`${API_URL}/${id}`, 'DELETE');
+                    toast.fire({ icon: 'success', title: 'Đã xóa thành công' });
+                    loadData();
+                } catch (error) {
+                    toast.fire({ icon: 'error', title: 'Lỗi khi xóa dữ liệu' });
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            modal = new bootstrap.Modal(document.getElementById('crudModal'));
+            loadData();
+        });
+    </script>
+</body>
+</html>
