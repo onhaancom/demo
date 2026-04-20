@@ -40,9 +40,9 @@ public class LecturerCourseClassApiController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/course-section/{courseSectionId}")
-    public ResponseEntity<List<LecturerCourseClass>> getByCourseSectionId(@PathVariable UUID courseSectionId) {
-        return ResponseEntity.ok(lecturerCourseClassService.getByCourseSectionId(courseSectionId));
+    @GetMapping("/course-class/{courseClassId}")
+    public ResponseEntity<List<LecturerCourseClass>> getByCourseClassId(@PathVariable UUID courseClassId) {
+        return ResponseEntity.ok(lecturerCourseClassService.getByCourseClassId(courseClassId));
     }
 
     @GetMapping("/employee/{employeeId}")

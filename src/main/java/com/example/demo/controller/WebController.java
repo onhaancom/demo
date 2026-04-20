@@ -55,4 +55,11 @@ public class WebController {
         model.addAttribute("pageTitle", "Phân công Giảng viên");
         return "lecturer_assignments";
     }
+
+    @GetMapping("/intakes")
+    public String intakes(Model model) {
+        model.addAttribute("activePage", "intakes");
+        model.addAttribute("pageTitle", "Quản lý Niên khóa");
+        return "intakes";
+    }
 }

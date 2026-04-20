@@ -22,10 +22,10 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-4">Mã</th>
-                                <th>Tên năm học</th>
-                                <th>Năm bắt đầu</th>
-                                <th>Năm kết thúc</th>
-                                <th>Mô tả</th>
+                                <th>Tên giáo trình</th>
+                                <th>Bắt đầu</th>
+                                <th>Kết thúc</th>
+                                <th>Ghi chú</th>
                                 <th>Trạng thái</th>
                                 <th class="pe-4 text-center">Thao tác</th>
                             </tr>
@@ -63,13 +63,17 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Năm bắt đầu</label>
-                                    <input type="number" class="form-control" id="startYear" min="2000" max="2100" required>
+                                    <label class="form-label fw-semibold">Ngày bắt đầu</label>
+                                    <input type="date" class="form-control" id="startDate" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Năm kết thúc</label>
-                                    <input type="number" class="form-control" id="endYear" min="2000" max="2100" required>
+                                    <label class="form-label fw-semibold">Ngày kết thúc</label>
+                                    <input type="date" class="form-control" id="endDate" required>
                                 </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Ghi chú</label>
+                                <textarea class="form-control" id="note" rows="2"></textarea>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Mô tả</label>
@@ -104,9 +108,9 @@
                     <tr>
                         <td class="ps-4 fw-medium text-primary">${item.code || ''}</td>
                         <td>${item.name || ''}</td>
-                        <td>${item.startYear || ''}</td>
-                        <td>${item.endYear || ''}</td>
-                        <td><small class="text-muted">${item.description || ''}</small></td>
+                        <td>${item.startDate || ''}</td>
+                        <td>${item.endDate || ''}</td>
+                        <td><small class="text-muted">${item.note || ''}</small></td>
                         <td><span class="status-badge ${item.isActive ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}">${item.isActive ? 'Hoạt động' : 'Tạm dừng'}</span></td>
                         <td class="pe-4 text-center">
                             <button class="btn btn-sm btn-info-subtle action-btn text-info me-1" onclick="openModal('${item.id}')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
@@ -129,8 +133,9 @@
                     const item = await apiRequest(`${API_URL}/${id}`);
                     document.getElementById('code').value = item.code || '';
                     document.getElementById('name').value = item.name || '';
-                    document.getElementById('startYear').value = item.startYear || '';
-                    document.getElementById('endYear').value = item.endYear || '';
+                    document.getElementById('startDate').value = item.startDate || '';
+                    document.getElementById('endDate').value = item.endDate || '';
+                    document.getElementById('note').value = item.note || '';
                     document.getElementById('description').value = item.description || '';
                 } catch (error) {
                     toast.fire({ icon: 'error', title: 'Lỗi khi tải thông tin' });
@@ -146,8 +151,9 @@
             const data = {
                 code: document.getElementById('code').value,
                 name: document.getElementById('name').value,
-                startYear: parseInt(document.getElementById('startYear').value) || null,
-                endYear: parseInt(document.getElementById('endYear').value) || null,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                note: document.getElementById('note').value,
                 description: document.getElementById('description').value
             };
 

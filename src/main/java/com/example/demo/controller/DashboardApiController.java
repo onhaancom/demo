@@ -14,10 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.CourseSection;
 import com.example.demo.model.LecturerCourseClass;
-import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.CourseSectionRepository;
-import com.example.demo.repository.EmployeeRepository;
 import com.example.demo.repository.LecturerCourseClassRepository;
+import com.example.demo.repository.IntakeRepository;
 import com.example.demo.repository.SchoolYearRepository;
 import com.example.demo.repository.SemesterRepository;
 import com.example.demo.repository.StudentCourseSectionRepository;
@@ -41,12 +40,9 @@ public class DashboardApiController {
     
     @Autowired
     private LecturerCourseClassRepository lecturerCourseClassRepository;
-    
+
     @Autowired
-    private EmployeeRepository employeeRepository;
-    
-    @Autowired
-    private CourseRepository courseRepository;
+    private IntakeRepository intakeRepository;
 
     // 3.1. Danh sách lớp học phần đầy đủ thông tin năm học/học kỳ
     @GetMapping("/course-sections-full")
@@ -124,36 +120,15 @@ public class DashboardApiController {
         for (LecturerCourseClass lcc : assignments) {
             Map<String, Object> item = new HashMap<>();
             item.put("id", lcc.getId());
-            item.put("employeeId", lcc.getEmployeeId());
-            item.put("courseSectionId", lcc.getCourseSectionId());
-            item.put("role", lcc.getRole());
+            item.put("maGV", lcc.getEmployeeId());
+            item.put("maLopHocPhan", lcc.getCourseClassId());
+            item.put("vaiTro", lcc.getRole());
             
-            // Lấy thông tin giảng viên
-            if (lcc.getEmployeeId() != null) {
-                com.example.demo.model.Employee emp = null;
-                try {
-                    var empRepo = com.example.demo.repository.EmployeeRepository.class;
-                    // Use reflection or inject EmployeeRepository
-                } catch (Exception e) {
-                    // Skip if can't get employee
-                }
-            }
-            
-            // Lấy thông tin lớp học phần và tên môn học
-            if (lcc.getCourseSectionId() != null) {
-                courseSectionRepository.findById(lcc.getCourseSectionId()).ifPresent(cs -> {
-                    item.put("courseSectionCode", cs.getCode());
-                    item.put("courseName", cs.getName());
-                    
-                    // Lấy tên môn học từ courseId
-                    if (cs.getCourseId() != null) {
-                        com.example.demo.model.Course course = null;
-                        try {
-                            var courseRepo = com.example.demo.repository.CourseRepository.class;
-                        } catch (Exception e) {
-                            // Skip
-                        }
-                    }
+            // Lấy thông tin lớp học phần
+            if (lcc.getCourseClassId() != null) {
+                courseSectionRepository.findById(lcc.getCourseClassId()).ifPresent(cs -> {
+                    item.put("maLop", cs.getCode());
+                    item.put("tenMon", cs.getName());
                 });
             }
             
@@ -172,6 +147,7 @@ public class DashboardApiController {
         overview.put("tongHocKy", semesterRepository.count());
         overview.put("tongLopHocPhan", courseSectionRepository.count());
         overview.put("tongPhanCongGiangDay", lecturerCourseClassRepository.count());
+        overview.put("tongNienKhoa", intakeRepository.count());
         
         return ResponseEntity.ok(overview);
     }

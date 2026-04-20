@@ -11,29 +11,28 @@
 </head>
 <body>
     <section>
-        <div class="card border-0 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center py-3 bg-white">
-                <h5 class="card-title mb-0 fw-bold"><i class="bi bi-calendar-event me-2 text-primary"></i>Danh sách Năm học</h5>
-                <button class="btn btn-primary px-4 shadow-sm" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Thêm mới</button>
+        <div class="card border-0">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-calendar-event me-2 text-primary"></i>Danh sách Năm học</h5>
+                <button class="btn btn-primary" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i> Thêm Năm học mới</button>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
                                 <th class="ps-4">Mã</th>
                                 <th>Tên năm học</th>
                                 <th>Năm</th>
-                                <th>Học kỳ</th>
-                                <th>Bắt đầu</th>
-                                <th>Kết thúc</th>
+                                <th>Ngày Bắt đầu</th>
+                                <th>Ngày Kết thúc</th>
                                 <th>Trạng thái</th>
                                 <th class="pe-4 text-center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="data-tbody">
                             <tr>
-                                <td colspan="8" class="text-center py-5">
+                                <td colspan="7" class="text-center py-5">
                                     <div class="spinner-border text-primary" role="status"></div>
                                 </td>
                             </tr>
@@ -43,47 +42,43 @@
             </div>
         </div>
 
-        <!-- CRUD Modal -->
-        <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true">
+        <!-- Modal -->
+        <div class="modal fade animate__animated animate__fadeInUp" id="crudModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow">
-                    <div class="modal-header">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-0 pb-0">
                         <h5 class="modal-title fw-bold" id="modalTitle">Thêm Năm học</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="crudForm">
-                        <div class="modal-body">
+                        <div class="modal-body p-4">
                             <input type="hidden" id="entityId">
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Mã năm học</label>
-                                <input type="text" class="form-control" id="code" required placeholder="VD: NH2024">
+                                <label class="form-label small fw-bold text-muted">Mã năm học</label>
+                                <input type="text" class="form-control rounded-3" id="code" required placeholder="VD: NH2024">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Tên năm học</label>
-                                <input type="text" class="form-control" id="name" required placeholder="VD: Năm học 2024-2025">
+                                <label class="form-label small fw-bold text-muted">Tên năm học</label>
+                                <input type="text" class="form-control rounded-3" id="name" required placeholder="VD: Năm học 2024-2025">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Năm</label>
-                                <input type="text" class="form-control" id="year" required placeholder="VD: 2024">
+                                <label class="form-label small fw-bold text-muted">Năm</label>
+                                <input type="text" class="form-control rounded-3" id="year" required placeholder="2024">
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Ngày bắt đầu</label>
-                                    <input type="date" class="form-control" id="startDate" required>
+                                    <label class="form-label small fw-bold text-muted">Bắt đầu</label>
+                                    <input type="date" class="form-control rounded-3" id="startDate" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Ngày kết thúc</label>
-                                    <input type="date" class="form-control" id="endDate" required>
+                                    <label class="form-label small fw-bold text-muted">Kết thúc</label>
+                                    <input type="date" class="form-control rounded-3" id="endDate" required>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Mô tả</label>
-                                <textarea class="form-control" id="description" rows="2"></textarea>
-                            </div>
                         </div>
-                        <div class="modal-footer bg-light px-4">
-                            <button type="button" class="btn btn-light border px-4" data-bs-dismiss="modal">Hủy</button>
-                            <button type="submit" class="btn btn-primary px-4 shadow-sm">Lưu lại</button>
+                        <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                            <button type="button" class="btn btn-light px-4 rounded-3" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary px-4 rounded-3 shadow">Lưu lại</button>
                         </div>
                     </form>
                 </div>
@@ -107,27 +102,29 @@
 
                 tbody.innerHTML = data.map(item => `
                     <tr>
-                        <td class="ps-4 fw-medium text-primary">${item.code || ''}</td>
-                        <td>${item.name || ''}</td>
-                        <td>${item.year || ''}</td>
+                        <td class="ps-4 fw-bold text-primary">${item.code || ''}</td>
+                        <td class="fw-medium">${item.name || ''}</td>
+                        <td><span class="badge bg-light text-dark border">${item.year || ''}</span></td>
                         <td>${item.startDate || ''}</td>
                         <td>${item.endDate || ''}</td>
                         <td><span class="status-badge ${item.isActive ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}">${item.isActive ? 'Hoạt động' : 'Tạm dừng'}</span></td>
                         <td class="pe-4 text-center">
-                            <button class="btn btn-sm btn-info-subtle action-btn text-info me-1" onclick="openModal('${item.id}')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-sm btn-danger-subtle action-btn text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
+                            <div class="btn-group shadow-sm rounded-3 overflow-hidden">
+                                <button class="btn btn-sm btn-white border-end" onclick="openModal('${item.id}')" title="Sửa"><i class="bi bi-pencil text-primary"></i></button>
+                                <button class="btn btn-sm btn-white text-danger" onclick="deleteItem('${item.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
+                            </div>
                         </td>
                     </tr>
                 `).join('');
             } catch (error) {
-                toast.fire({ icon: 'error', title: 'Lỗi khi tải danh sách' });
+                toast.fire({ icon: 'error', title: 'Lỗi tải dữ liệu' });
             }
         }
 
         async function openModal(id = null) {
             document.getElementById('crudForm').reset();
             document.getElementById('entityId').value = id || '';
-            document.getElementById('modalTitle').textContent = id ? 'Chỉnh sửa Năm học' : 'Thêm Năm học';
+            document.getElementById('modalTitle').textContent = id ? 'Cập nhật Năm học' : 'Thêm Năm học mới';
             
             if (id) {
                 try {
@@ -137,9 +134,8 @@
                     document.getElementById('year').value = item.year || '';
                     document.getElementById('startDate').value = item.startDate || '';
                     document.getElementById('endDate').value = item.endDate || '';
-                    document.getElementById('description').value = item.description || '';
                 } catch (error) {
-                    toast.fire({ icon: 'error', title: 'Lỗi khi tải thông tin' });
+                    toast.fire({ icon: 'error', title: 'Lỗi tải thông tin' });
                     return;
                 }
             }
@@ -154,33 +150,29 @@
                 name: document.getElementById('name').value,
                 year: document.getElementById('year').value,
                 startDate: document.getElementById('startDate').value,
-                endDate: document.getElementById('endDate').value,
-                description: document.getElementById('description').value
+                endDate: document.getElementById('endDate').value
             };
 
             try {
                 if (id) {
                     await apiRequest(`${API_URL}/${id}`, 'PUT', data);
-                    toast.fire({ icon: 'success', title: 'Cập nhật thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã cập nhật' });
                 } else {
                     await apiRequest(API_URL, 'POST', data);
-                    toast.fire({ icon: 'success', title: 'Thêm mới thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã thêm mới' });
                 }
                 modal.hide();
                 loadData();
             } catch (error) {
-                toast.fire({ icon: 'error', title: 'Lỗi khi lưu dữ liệu' });
+                toast.fire({ icon: 'error', title: 'Lỗi không thể lưu' });
             }
         };
 
         async function deleteItem(id) {
             const result = await Swal.fire({
-                title: 'Xác nhận xóa?',
-                text: "Bạn không thể hoàn tác hành động này!",
+                title: 'Xóa mục này?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Đồng ý',
                 cancelButtonText: 'Hủy'
             });
@@ -188,10 +180,10 @@
             if (result.isConfirmed) {
                 try {
                     await apiRequest(`${API_URL}/${id}`, 'DELETE');
-                    toast.fire({ icon: 'success', title: 'Đã xóa thành công' });
+                    toast.fire({ icon: 'success', title: 'Đã xóa' });
                     loadData();
                 } catch (error) {
-                    toast.fire({ icon: 'error', title: 'Lỗi khi xóa dữ liệu' });
+                    toast.fire({ icon: 'error', title: 'Lỗi khi xóa' });
                 }
             }
         }

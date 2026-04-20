@@ -8,93 +8,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demo.model.Course;
-import com.example.demo.model.CourseSection;
-import com.example.demo.model.Student;
 import com.example.demo.model.StudentCourseSection;
-import com.example.demo.repository.AcademicYearRepository;
-import com.example.demo.repository.CourseRepository;
-import com.example.demo.repository.CourseSectionRepository;
-import com.example.demo.repository.SemesterRepository;
 import com.example.demo.repository.StudentCourseSectionRepository;
-import com.example.demo.repository.StudentRepository;
 
 @Service
 public class StudentCourseSectionService {
 
     @Autowired
     private StudentCourseSectionRepository studentCourseSectionRepository;
-    
-    @Autowired
-    private StudentRepository studentRepository;
-    
-    @Autowired
-    private CourseSectionRepository courseSectionRepository;
-    
-    @Autowired
-    private SemesterRepository semesterRepository;
-    
-    @Autowired
-    private AcademicYearRepository academicYearRepository;
-    
-    @Autowired
-    private CourseRepository courseRepository;
 
     public List<StudentCourseSection> getAll() {
-        List<StudentCourseSection> list = studentCourseSectionRepository.findByIsActiveTrue();
-        return enrichWithDisplayNames(list);
+        return studentCourseSectionRepository.findAll();
     }
 
     public List<StudentCourseSection> getAllActive() {
-        List<StudentCourseSection> list = studentCourseSectionRepository.findByIsActiveTrue();
-        return enrichWithDisplayNames(list);
+        return studentCourseSectionRepository.findByIsActiveTrue();
     }
 
     public StudentCourseSection getById(UUID id) {
-        StudentCourseSection scs = studentCourseSectionRepository.findById(id).orElse(null);
-        if (scs != null) {
-            return enrichWithDisplayName(scs);
-        }
-        return null;
-    }
-    
-    private StudentCourseSection enrichWithDisplayName(StudentCourseSection scs) {
-        if (scs.getStudentId() != null) {
-            Student student = studentRepository.findById(scs.getStudentId()).orElse(null);
-            if (student != null) {
-                scs.setStudentName(student.getFirstName() + " " + student.getLastName());
-                scs.setStudentCode(student.getCode());
-            }
-        }
-        if (scs.getCourseSectionId() != null) {
-            CourseSection cs = courseSectionRepository.findById(scs.getCourseSectionId()).orElse(null);
-            if (cs != null) {
-                scs.setCourseSectionCode(cs.getCode());
-                if (cs.getCourseId() != null) {
-                    Course course = courseRepository.findById(cs.getCourseId()).orElse(null);
-                    if (course != null) scs.setCourseName(course.getName());
-                }
-                // Get semester and academic year info
-                if (cs.getSemesterId() != null) {
-                    semesterRepository.findById(cs.getSemesterId()).ifPresent(sm -> {
-                        scs.setSemesterName(sm.getName());
-                        if (sm.getSchoolYearId() != null) {
-                            academicYearRepository.findById(sm.getSchoolYearId()).ifPresent(sy -> {
-                                scs.setAcademicYearName(sy.getName());
-                            });
-                        }
-                    });
-                }
-            }
-        }
-        return scs;
-    }
-    
-    private List<StudentCourseSection> enrichWithDisplayNames(List<StudentCourseSection> list) {
-        for (StudentCourseSection scs : list) {
-            enrichWithDisplayName(scs);
-        }
-        return list;
+        return studentCourseSectionRepository.findById(id).orElse(null);
     }
 
     public List<StudentCourseSection> getByCourseSectionId(UUID courseSectionId) {
@@ -112,13 +44,9 @@ public class StudentCourseSectionService {
     @Transactional
     public StudentCourseSection create(StudentCourseSection studentCourseSection) {
         studentCourseSection.setCreatedAt(LocalDateTime.now());
-        studentCourseSection.setRegistrationDate(LocalDateTime.now());
+        studentCourseSection.setRegisteredAt(LocalDateTime.now());
         studentCourseSection.setIsActive(true);
-        if (studentCourseSection.getStatus() == null) {
-            studentCourseSection.setStatus("PENDING");
-        }
-        StudentCourseSection saved = studentCourseSectionRepository.save(studentCourseSection);
-        return enrichWithDisplayName(saved);
+        return studentCourseSectionRepository.save(studentCourseSection);
     }
 
     @Transactional
@@ -128,12 +56,9 @@ public class StudentCourseSectionService {
             existing.setStudentId(studentCourseSection.getStudentId());
             existing.setCourseSectionId(studentCourseSection.getCourseSectionId());
             existing.setStatus(studentCourseSection.getStatus());
-            existing.setGrade(studentCourseSection.getGrade());
-            existing.setGradeScore(studentCourseSection.getGradeScore());
             existing.setNote(studentCourseSection.getNote());
             existing.setUpdatedAt(LocalDateTime.now());
-            StudentCourseSection saved = studentCourseSectionRepository.save(existing);
-            return enrichWithDisplayName(saved);
+            return studentCourseSectionRepository.save(existing);
         }
         return null;
     }
@@ -142,6 +67,7 @@ public class StudentCourseSectionService {
     public void delete(UUID id) {
         StudentCourseSection studentCourseSection = studentCourseSectionRepository.findById(id).orElse(null);
         if (studentCourseSection != null) {
+            studentCourseSection.setDeletedAt(LocalDateTime.now());
             studentCourseSection.setIsActive(false);
             studentCourseSectionRepository.save(studentCourseSection);
         }
