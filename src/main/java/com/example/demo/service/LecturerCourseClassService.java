@@ -12,10 +12,12 @@ import com.example.demo.model.Course;
 import com.example.demo.model.CourseSection;
 import com.example.demo.model.Employee;
 import com.example.demo.model.LecturerCourseClass;
+import com.example.demo.repository.AcademicYearRepository;
 import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.CourseSectionRepository;
 import com.example.demo.repository.EmployeeRepository;
 import com.example.demo.repository.LecturerCourseClassRepository;
+import com.example.demo.repository.SemesterRepository;
 
 @Service
 public class LecturerCourseClassService {
@@ -31,6 +33,12 @@ public class LecturerCourseClassService {
     
     @Autowired
     private CourseRepository courseRepository;
+    
+    @Autowired
+    private SemesterRepository semesterRepository;
+    
+    @Autowired
+    private AcademicYearRepository academicYearRepository;
 
     public List<LecturerCourseClass> getAll() {
         List<LecturerCourseClass> list = lecturerCourseClassRepository.findByIsActiveTrue();
@@ -65,6 +73,17 @@ public class LecturerCourseClassService {
                 if (cs.getCourseId() != null) {
                     Course course = courseRepository.findById(cs.getCourseId()).orElse(null);
                     if (course != null) lcc.setCourseName(course.getName());
+                }
+                // Get semester and academic year info
+                if (cs.getSemesterId() != null) {
+                    semesterRepository.findById(cs.getSemesterId()).ifPresent(sm -> {
+                        lcc.setSemesterName(sm.getName());
+                        if (sm.getSchoolYearId() != null) {
+                            academicYearRepository.findById(sm.getSchoolYearId()).ifPresent(sy -> {
+                                lcc.setAcademicYearName(sy.getName());
+                            });
+                        }
+                    });
                 }
             }
         }

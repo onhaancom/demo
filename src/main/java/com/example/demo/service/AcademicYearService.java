@@ -10,12 +10,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.model.AcademicYear;
 import com.example.demo.repository.AcademicYearRepository;
+import com.example.demo.repository.SemesterRepository;
 
 @Service
 public class AcademicYearService {
 
     @Autowired
     private AcademicYearRepository academicYearRepository;
+    
+    @Autowired
+    private SemesterRepository semesterRepository;
 
     public List<AcademicYear> getAll() {
         return academicYearRepository.findByIsActiveTrue();

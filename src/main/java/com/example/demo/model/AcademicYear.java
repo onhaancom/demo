@@ -51,6 +51,13 @@ public class AcademicYear {
 
     @Column(columnDefinition = "UNIQUEIDENTIFIER")
     private UUID updatedBy;
+    
+    // ===== Transient fields for display =====
+    @jakarta.persistence.Transient
+    private Integer semesterCount;
+    
+    @jakarta.persistence.Transient
+    private List<String> semesterNames;
 
     // ===== Constructor =====
     public AcademicYear() {}

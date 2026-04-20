@@ -24,13 +24,14 @@
                                 <th class="ps-4">Giảng viên</th>
                                 <th>Lớp học phần</th>
                                 <th>Tên môn</th>
+                                <th>Năm học</th>
                                 <th>Vai trò</th>
                                 <th class="pe-4 text-center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="data-tbody">
                             <tr>
-                                <td colspan="5" class="text-center py-5">
+                                <td colspan="6" class="text-center py-5">
                                     <div class="spinner-border text-primary" role="status"></div>
                                 </td>
                             </tr>
@@ -172,12 +173,12 @@
 
         async function loadData() {
             try {
-                // Use dashboard API for more complete list data
-                const data = await apiRequest(DASHBOARD_API);
+                // Use main API to get data with academic year info
+                const data = await apiRequest(API_URL);
                 const tbody = document.getElementById('data-tbody');
                 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Không có dữ liệu</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted">Không có dữ liệu</td></tr>';
                     return;
                 }
 
@@ -186,6 +187,7 @@
                         <td class="ps-4 fw-medium text-primary">${item.employeeName || item.employeeCode || 'N/A'}</td>
                         <td>${item.courseSectionCode || 'N/A'}</td>
                         <td>${item.courseName || ''}</td>
+                        <td>${item.academicYearName || (item.semesterName ? item.semesterName + (item.academicYearName ? ' - ' + item.academicYearName : '') : 'N/A')}</td>
                         <td><span class="badge bg-info-subtle text-info border border-info-subtle px-3">${item.role === 'LECTURER' ? 'Giảng viên chính' : item.role === 'TA' ? 'Trợ giảng' : item.role === 'CO_LECTURER' ? 'Cố giảng viên' : item.role || ''}</span></td>
                         <td class="pe-4 text-center">
                             <button class="btn btn-sm btn-info-subtle action-btn text-info me-1" onclick="openModal('${item.id}')" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></button>
