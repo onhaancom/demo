@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.model.AcademicYear;
+import com.example.demo.model.Semester;
 import com.example.demo.repository.AcademicYearRepository;
 import com.example.demo.repository.SemesterRepository;
 
@@ -22,15 +23,37 @@ public class AcademicYearService {
     private SemesterRepository semesterRepository;
 
     public List<AcademicYear> getAll() {
-        return academicYearRepository.findByIsActiveTrue();
+        List<AcademicYear> list = academicYearRepository.findByIsActiveTrue();
+        return enrichWithSemesterInfo(list);
     }
 
     public List<AcademicYear> getAllActive() {
-        return academicYearRepository.findByIsActiveTrue();
+        List<AcademicYear> list = academicYearRepository.findByIsActiveTrue();
+        return enrichWithSemesterInfo(list);
     }
 
     public AcademicYear getById(UUID id) {
-        return academicYearRepository.findById(id).orElse(null);
+        AcademicYear ay = academicYearRepository.findById(id).orElse(null);
+        if (ay != null) {
+            return enrichWithSemesterInfo(ay);
+        }
+        return null;
+    }
+    
+    private AcademicYear enrichWithSemesterInfo(AcademicYear ay) {
+        if (ay.getId() != null) {
+            var semesters = semesterRepository.findBySchoolYearId(ay.getId());
+            ay.setSemesterCount(semesters.size());
+            ay.setSemesterNames(semesters.stream().map(Semester::getName).toList());
+        }
+        return ay;
+    }
+    
+    private List<AcademicYear> enrichWithSemesterInfo(List<AcademicYear> list) {
+        for (AcademicYear ay : list) {
+            enrichWithSemesterInfo(ay);
+        }
+        return list;
     }
 
     @Transactional

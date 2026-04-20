@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
@@ -107,4 +108,10 @@ public class AcademicYear {
 
     public UUID getUpdatedBy() { return updatedBy; }
     public void setUpdatedBy(UUID updatedBy) { this.updatedBy = updatedBy; }
+    
+    public Integer getSemesterCount() { return semesterCount; }
+    public void setSemesterCount(Integer semesterCount) { this.semesterCount = semesterCount; }
+    
+    public List<String> getSemesterNames() { return semesterNames; }
+    public void setSemesterNames(List<String> semesterNames) { this.semesterNames = semesterNames; }
 }
