@@ -70,6 +70,12 @@ public class StudentCourseSection {
     
     @Transient
     private String courseName;
+    
+    @Transient
+    private String semesterName;
+    
+    @Transient
+    private String academicYearName;
 
     // ===== Constructor =====
     public StudentCourseSection() {}
@@ -132,4 +138,10 @@ public class StudentCourseSection {
 
     public String getCourseName() { return courseName; }
     public void setCourseName(String courseName) { this.courseName = courseName; }
+    
+    public String getSemesterName() { return semesterName; }
+    public void setSemesterName(String semesterName) { this.semesterName = semesterName; }
+    
+    public String getAcademicYearName() { return academicYearName; }
+    public void setAcademicYearName(String academicYearName) { this.academicYearName = academicYearName; }
 }

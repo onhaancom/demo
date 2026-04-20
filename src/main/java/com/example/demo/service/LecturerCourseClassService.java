@@ -90,7 +90,8 @@ public class LecturerCourseClassService {
     public LecturerCourseClass create(LecturerCourseClass lecturerCourseClass) {
         lecturerCourseClass.setCreatedAt(LocalDateTime.now());
         lecturerCourseClass.setIsActive(true);
-        return lecturerCourseClassRepository.save(lecturerCourseClass);
+        LecturerCourseClass saved = lecturerCourseClassRepository.save(lecturerCourseClass);
+        return enrichWithDisplayName(saved);
     }
 
     @Transactional
@@ -104,7 +105,8 @@ public class LecturerCourseClassService {
             existing.setIsPrimary(lecturerCourseClass.getIsPrimary());
             existing.setNote(lecturerCourseClass.getNote());
             existing.setUpdatedAt(LocalDateTime.now());
-            return lecturerCourseClassRepository.save(existing);
+            LecturerCourseClass saved = lecturerCourseClassRepository.save(existing);
+            return enrichWithDisplayName(saved);
         }
         return null;
     }

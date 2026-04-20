@@ -12,8 +12,10 @@ import com.example.demo.model.Course;
 import com.example.demo.model.CourseSection;
 import com.example.demo.model.Student;
 import com.example.demo.model.StudentCourseSection;
+import com.example.demo.repository.AcademicYearRepository;
 import com.example.demo.repository.CourseRepository;
 import com.example.demo.repository.CourseSectionRepository;
+import com.example.demo.repository.SemesterRepository;
 import com.example.demo.repository.StudentCourseSectionRepository;
 import com.example.demo.repository.StudentRepository;
 
@@ -28,6 +30,12 @@ public class StudentCourseSectionService {
     
     @Autowired
     private CourseSectionRepository courseSectionRepository;
+    
+    @Autowired
+    private SemesterRepository semesterRepository;
+    
+    @Autowired
+    private AcademicYearRepository academicYearRepository;
     
     @Autowired
     private CourseRepository courseRepository;
@@ -66,6 +74,17 @@ public class StudentCourseSectionService {
                     Course course = courseRepository.findById(cs.getCourseId()).orElse(null);
                     if (course != null) scs.setCourseName(course.getName());
                 }
+                // Get semester and academic year info
+                if (cs.getSemesterId() != null) {
+                    semesterRepository.findById(cs.getSemesterId()).ifPresent(sm -> {
+                        scs.setSemesterName(sm.getName());
+                        if (sm.getSchoolYearId() != null) {
+                            academicYearRepository.findById(sm.getSchoolYearId()).ifPresent(sy -> {
+                                scs.setAcademicYearName(sy.getName());
+                            });
+                        }
+                    });
+                }
             }
         }
         return scs;
@@ -98,7 +117,8 @@ public class StudentCourseSectionService {
         if (studentCourseSection.getStatus() == null) {
             studentCourseSection.setStatus("PENDING");
         }
-        return studentCourseSectionRepository.save(studentCourseSection);
+        StudentCourseSection saved = studentCourseSectionRepository.save(studentCourseSection);
+        return enrichWithDisplayName(saved);
     }
 
     @Transactional
@@ -112,7 +132,8 @@ public class StudentCourseSectionService {
             existing.setGradeScore(studentCourseSection.getGradeScore());
             existing.setNote(studentCourseSection.getNote());
             existing.setUpdatedAt(LocalDateTime.now());
-            return studentCourseSectionRepository.save(existing);
+            StudentCourseSection saved = studentCourseSectionRepository.save(existing);
+            return enrichWithDisplayName(saved);
         }
         return null;
     }
